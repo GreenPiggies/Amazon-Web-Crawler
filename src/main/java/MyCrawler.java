@@ -39,7 +39,7 @@ public class MyCrawler extends WebCrawler {
         String href = url.getURL().toLowerCase();
 
         // pretty simple heuristic, visit the page if its an amazon link.
-        return href.startsWith("https://www.amazon.com/");
+        return href.startsWith("https://www.amazon.com/") && href.contains("/dp/"); // means its a product
     }
 
     /**
@@ -74,12 +74,18 @@ public class MyCrawler extends WebCrawler {
             HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
             String text = htmlParseData.getText();
             String html = htmlParseData.getHtml();
+
+            AmazonDataParser parser = new AmazonDataParser(htmlParseData);
+
+            System.out.println("-------");
+            System.out.println("title: " + parser.getTitle());
+            System.out.println("-------");
             // this code gets the outgoing URLs, which we want to crawl
             Set<WebURL> links = htmlParseData.getOutgoingUrls();
 
             logger.debug("Text length: {}", text.length());
             logger.debug("Html length: {}", html.length());
-            logger.debug("Number of outgoing links: {}", links.size());
+//            logger.debug("Number of outgoing links: {}", links.size());
         }
 
         // some metadata about the page
