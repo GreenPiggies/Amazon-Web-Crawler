@@ -4,9 +4,14 @@ import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.http.Header;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+
+import org.json.simple.*;
 
 /**
  * The MyCrawler class constructs an Amazon Web Crawler that keeps track of the number of pages it has crawled through.
@@ -52,6 +57,9 @@ public class MyCrawler extends WebCrawler {
         /* A lot of this website data isn't used right now, I'm in the process of going through these and figuring out exactly what they are.
          * For now, I'm just printing them out on the logger.
          * */
+
+        JSONObject obj = new JSONObject();
+
         int docid = page.getWebURL().getDocid();
         String url = page.getWebURL().getURL();
         String domain = page.getWebURL().getDomain();
@@ -80,6 +88,25 @@ public class MyCrawler extends WebCrawler {
             System.out.println("-------");
             System.out.println("title: " + parser.getTitle());
             System.out.println("-------");
+            System.out.println("price: " + parser.getPrice());
+            System.out.println("-------");
+
+            // JSON CODE
+            obj.put("Name", parser.getTitle());
+            obj.put("Price", "$" + parser.getPrice());
+
+            try {
+                File file = new File("D:\\tmp-json\\" + docid + ".json");
+                file.createNewFile();
+                FileWriter fileWriter = new FileWriter(file);
+                fileWriter.write(obj.toJSONString());
+                fileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+
             // this code gets the outgoing URLs, which we want to crawl
             Set<WebURL> links = htmlParseData.getOutgoingUrls();
 

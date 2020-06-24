@@ -4,6 +4,7 @@ import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
+import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -11,6 +12,19 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MyController {
     public static void main(String[] args) throws Exception {
+
+
+        //TEST
+
+        File dir = new File("/tmp/");
+        dir.mkdirs();
+
+        File file = new File(".");
+        for(String fileNames : file.list()) System.out.println(fileNames);
+
+        // END TEST
+
+
         CrawlConfig config = new CrawlConfig();
 
         config.setUserAgentString("intern bot");
@@ -42,7 +56,7 @@ public class MyController {
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
         // add our controller seed (start page)
-        controller.addSeed("https://www.amazon.com/dp/B07FZ8S74R/");
+        controller.addSeed("https://www.amazon.com/Angry-Birds-Stella-Plush-Toy/dp/B00T3TXBFA/");
 
         // number of threads used during crawling
         int numberOfCrawlers = 8;
