@@ -90,20 +90,21 @@ public class MyCrawler extends WebCrawler {
             System.out.println("-------");
             System.out.println("price: " + parser.getPrice());
             System.out.println("-------");
+            System.out.println("main image link: " + parser.getMainImage());
 
-            // JSON CODE
-            obj.put("Name", parser.getTitle());
-            obj.put("Price", "$" + parser.getPrice());
-
-            try {
-                File file = new File("D:\\tmp-json\\" + docid + ".json");
-                file.createNewFile();
-                FileWriter fileWriter = new FileWriter(file);
-                fileWriter.write(obj.toJSONString());
-                fileWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            // JSON CODE
+//            obj.put("Name", parser.getTitle());
+//            obj.put("Price", "$" + parser.getPrice());
+//
+//            try {
+//                File file = new File("D:\\tmp-json\\" + docid + ".json");
+//                file.createNewFile();
+//                FileWriter fileWriter = new FileWriter(file);
+//                fileWriter.write(obj.toJSONString());
+//                fileWriter.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 
 
 
