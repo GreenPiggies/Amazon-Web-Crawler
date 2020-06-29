@@ -27,7 +27,7 @@ public class MyController {
 
         CrawlConfig config = new CrawlConfig();
 
-        config.setUserAgentString("intern bot");
+        config.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36 Edg/83.0.478.56");
 
         // this folder stores all the data that the crawler needs to store
         config.setCrawlStorageFolder("/tmp/amazon-web-crawler/");
@@ -36,10 +36,10 @@ public class MyController {
         config.setPolitenessDelay(5000);
 
         // how far we can crawl from the "seed" pages (think DFS depth)
-        config.setMaxDepthOfCrawling(2);
+        config.setMaxDepthOfCrawling(32767);
 
         // max number of pages we can fetch
-        config.setMaxPagesToFetch(1000);
+        config.setMaxPagesToFetch(1000000);
 
         // binary content includes pictures, etc etc.
         config.setIncludeBinaryContentInCrawling(false);
@@ -56,7 +56,7 @@ public class MyController {
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
         // add our controller seed (start page)
-        controller.addSeed("https://www.amazon.com/Angry-Birds-Stella-Plush-Toy/dp/B00T3TXBFA/");
+        controller.addSeed("https://www.amazon.com/Gaming-Livestream-Chat-Memes-T-Shirt/dp/B07L4J7RF1/");
 
         // number of threads used during crawling
         int numberOfCrawlers = 8;

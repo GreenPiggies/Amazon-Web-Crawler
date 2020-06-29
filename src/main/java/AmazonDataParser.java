@@ -4,6 +4,7 @@ import edu.uci.ics.crawler4j.url.WebURL;
 import javax.xml.bind.DatatypeConverter;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -20,6 +21,13 @@ public class AmazonDataParser implements DataParser {
     static final Pattern regularPricePattern = Pattern.compile("<span id=\"priceblock_ourprice\"[^>]+>");
     static final Pattern mainImagePattern = Pattern.compile("<div id=\"imgTagWrapperId\"[^>]+>");
     static final Pattern imagePattern = Pattern.compile("src=\"");
+    static final Pattern reviewPattern = Pattern.compile("data-hook=\"review\"[^>]+>");
+    static final Pattern reviewNamePattern = Pattern.compile("<span class=\"a-profile-name\">");
+    static final Pattern reviewTitlePattern = Pattern.compile("<a data-hook=\"review-title\"[^>]+>[^<]+<span>");
+    static final Pattern reviewDatePattern = Pattern.compile("<span data-hook=\"review-date\"[^>]+>");
+    static final Pattern reviewTextPattern = Pattern.compile("<div data-hook=\"review-collapsed\"[^>]+>[^<]+<span>");
+    static final Pattern reviewRatingPattern = Pattern.compile("<i data-hook=\"review-star-rating\"[^>]+><span[^>]+>");
+
 
 
     private String html;
@@ -28,10 +36,12 @@ public class AmazonDataParser implements DataParser {
     double price;
     WebURL image;
     List<WebURL> altImages;
+    List<Review> reviews;
 
     public AmazonDataParser(HtmlParseData data) {
         this.data = data;
         html = data.getHtml();
+        reviews = new ArrayList<Review>();
     }
 
     public String print() {
@@ -49,21 +59,59 @@ public class AmazonDataParser implements DataParser {
         return strBuilder.toString();
     }
 
+    public List<Review> getReviews() {
+        Matcher matcher = reviewPattern.matcher(html);
+        while (matcher.find()) {
+            Review review = new Review();
+            int index = matcher.end();
+            String temp = html.substring(index);
+            Matcher tempMatcher = reviewNamePattern.matcher(temp);
+            if (tempMatcher.find()) { // should happen
+                review.setName(getContent(reviewNamePattern, temp));
+            }
+            tempMatcher = reviewTitlePattern.matcher(temp);
+            if (tempMatcher.find()) { // should happen
+                review.setReviewTitle(getContent(reviewTitlePattern, temp));
+            }
+            tempMatcher = reviewDatePattern.matcher(temp);
+            if (tempMatcher.find()) { // should happen
+                review.setReviewDate(getContent(reviewDatePattern, temp));
+            }
+            tempMatcher = reviewRatingPattern.matcher(temp);
+            if (tempMatcher.find()) { // should happen
+                review.setRating(Double.parseDouble(getContent(reviewRatingPattern, temp).substring(0, 3))); // should be something like 3.0 or 4.0
+            }
+            tempMatcher = reviewTextPattern.matcher(temp);
+            if (tempMatcher.find()) { // should happen
+                StringBuilder strBuilder = new StringBuilder();
+                int idx = tempMatcher.end();
+                while (idx < temp.length() && (strBuilder.toString().length() < 7 || !strBuilder.toString().substring(strBuilder.length() - 7, strBuilder.length()).equals("</span>"))) {
+                    strBuilder.append(temp.charAt(idx));
+                    idx++;
+                }
+                String text = strBuilder.toString();
+                text.replaceAll("<br>", "\n");
+                text = text.substring(0, text.length() - 7);
+                review.setReviewText(text); // remove the </span> tag
+            }
+            reviews.add(review);
+        }
+        return reviews;
+    }
+
     /**
      * Helper method to extract the html within a given element.
      * @param p The pattern of the element.
      * @return A string containing the contents of that element, or null if the specified pattern doesn't exist.
      */
-    private String getContent(Pattern p) {
-        Matcher matcher = p.matcher(html);
+    private String getContent(Pattern p, String s) {
+        Matcher matcher = p.matcher(s);
 
-        while (matcher.find()) {
-            System.out.println("found");
+        if (matcher.find()) {
             int index = matcher.end();
             StringBuilder strBuilder = new StringBuilder();
-            while (index < html.length()) {
-                char c = html.charAt(index);
-                System.out.print(c);
+            while (index < s.length()) {
+                char c = s.charAt(index);
                 if (c == '<') {
                     break;
                 } else {
@@ -71,8 +119,6 @@ public class AmazonDataParser implements DataParser {
                     index++;
                 }
             }
-            System.out.println();
-            System.out.println(strBuilder.toString().trim().length());
             return strBuilder.toString().trim();
         }
         return null;
@@ -136,7 +182,7 @@ public class AmazonDataParser implements DataParser {
 
     public String getTitle() {
         if (title == null) {
-            title = getContent(titlePattern);
+            title = getContent(titlePattern, html);
         }
         return title;
     }
@@ -148,17 +194,18 @@ public class AmazonDataParser implements DataParser {
             index = matcher.end();
             break;
         }
-        System.out.println(index);
-        System.out.println(html.substring(index).substring(0, 200));
         return getImage(html.substring(index));
     }
 
     public double getPrice() {
-        String temp = getContent(dealPricePattern);
+        String temp = getContent(dealPricePattern, html);
         if (temp == null) {
-            temp = getContent(regularPricePattern);
+            temp = getContent(regularPricePattern, html);
         }
 
         return Double.parseDouble(temp.substring(1));
     }
+
+
+
 }

@@ -85,12 +85,33 @@ public class MyCrawler extends WebCrawler {
 
             AmazonDataParser parser = new AmazonDataParser(htmlParseData);
 
+            // this code gets the outgoing URLs, which we want to crawl
+            Set<WebURL> links = htmlParseData.getOutgoingUrls();
+
+            logger.debug("Text length: {}", text.length());
+            logger.debug("Html length: {}", html.length());
+//            logger.debug("Number of outgoing links: {}", links.size());
+
+            try {
+                FileWriter writer = new FileWriter(new File("test.txt"));
+                writer.append(html);
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             System.out.println("-------");
             System.out.println("title: " + parser.getTitle());
             System.out.println("-------");
             System.out.println("price: " + parser.getPrice());
             System.out.println("-------");
-            System.out.println("main image link: " + parser.getMainImage());
+
+            for (Review r : parser.getReviews()) {
+                System.out.println(r);
+            }
+
+
+//            System.out.println("main image link: " + parser.getMainImage());
 
 //            // JSON CODE
 //            obj.put("Name", parser.getTitle());
@@ -108,12 +129,7 @@ public class MyCrawler extends WebCrawler {
 
 
 
-            // this code gets the outgoing URLs, which we want to crawl
-            Set<WebURL> links = htmlParseData.getOutgoingUrls();
 
-            logger.debug("Text length: {}", text.length());
-            logger.debug("Html length: {}", html.length());
-//            logger.debug("Number of outgoing links: {}", links.size());
         }
 
         // some metadata about the page
