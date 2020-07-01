@@ -27,6 +27,8 @@ public class AmazonDataParser implements DataParser {
     static final Pattern reviewDatePattern = Pattern.compile("<span data-hook=\"review-date\"[^>]+>");
     static final Pattern reviewTextPattern = Pattern.compile("<div data-hook=\"review-collapsed\"[^>]+>[^<]+<span>");
     static final Pattern reviewRatingPattern = Pattern.compile("<i data-hook=\"review-star-rating\"[^>]+><span[^>]+>");
+    static final Pattern altImagesHeaderPattern = Pattern.compile("<div id=\"altImages\"[^>]+>");
+    static final Pattern altImageHeaderPattern = Pattern.compile("<li class=\"a-spacing-small item\">");
 
 
 
@@ -34,14 +36,14 @@ public class AmazonDataParser implements DataParser {
 
     String title;
     double price;
-    WebURL image;
-    List<WebURL> altImages;
     List<Review> reviews;
+    List<String> altImages; // local path to alternate images
 
     public AmazonDataParser(HtmlParseData data) {
         this.data = data;
         html = data.getHtml();
         reviews = new ArrayList<Review>();
+        altImages = new ArrayList<String>();
     }
 
     public String print() {
@@ -57,6 +59,22 @@ public class AmazonDataParser implements DataParser {
             idx++;
         }
         return strBuilder.toString();
+    }
+
+    public List<String> getAlternateImages() {
+        Matcher matcher = altImagesHeaderPattern.matcher(html); // find the header for all alt images
+        if (matcher.find()) {
+            int idx = matcher.end();
+            String altImagesHtml = html.substring(idx);
+            matcher = altImageHeaderPattern.matcher(altImagesHtml);
+            while (matcher.find()) {
+                idx = matcher.end();
+                System.out.println(idx);
+                String altImageHtml = altImagesHtml.substring(matcher.end());
+                altImages.add(getImage(altImageHtml));
+            }
+        }
+        return altImages;
     }
 
     public List<Review> getReviews() {
@@ -198,12 +216,14 @@ public class AmazonDataParser implements DataParser {
     }
 
     public double getPrice() {
-        String temp = getContent(dealPricePattern, html);
-        if (temp == null) {
-            temp = getContent(regularPricePattern, html);
+        if (price == 0.0) {
+            String temp = getContent(dealPricePattern, html);
+            if (temp == null) {
+                temp = getContent(regularPricePattern, html);
+            }
+            price = Double.parseDouble(temp.substring(1));
         }
-
-        return Double.parseDouble(temp.substring(1));
+        return price;
     }
 
 

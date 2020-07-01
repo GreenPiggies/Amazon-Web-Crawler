@@ -7,6 +7,7 @@ import org.apache.http.Header;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -81,7 +82,7 @@ public class MyCrawler extends WebCrawler {
 
             HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
             String text = htmlParseData.getText();
-            String html = htmlParseData.getHtml();
+            String html = htmlParseData.getHtml().trim();
 
             AmazonDataParser parser = new AmazonDataParser(htmlParseData);
 
@@ -92,9 +93,14 @@ public class MyCrawler extends WebCrawler {
             logger.debug("Html length: {}", html.length());
 //            logger.debug("Number of outgoing links: {}", links.size());
 
+            html.replaceAll("[ \t\n\r]+","\n");
+
+            int num = 0;
             try {
-                FileWriter writer = new FileWriter(new File("test.txt"));
-                writer.append(html);
+                PrintWriter writer = new PrintWriter(new FileWriter(new File("test.txt")));
+                writer.println(html.length());
+                writer.println(html);
+                writer.flush();
                 writer.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -105,9 +111,14 @@ public class MyCrawler extends WebCrawler {
             System.out.println("-------");
             System.out.println("price: " + parser.getPrice());
             System.out.println("-------");
+            System.out.println("reviews: ");
 
             for (Review r : parser.getReviews()) {
                 System.out.println(r);
+            }
+            System.out.println("alternate images: ");
+            for (String s : parser.getAlternateImages()) {
+                System.out.println(s);
             }
 
 

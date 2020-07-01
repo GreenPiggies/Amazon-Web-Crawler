@@ -27,8 +27,8 @@ public class MyController {
 
         CrawlConfig config = new CrawlConfig();
 
-        config.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36 Edg/83.0.478.56");
-
+        config.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.74 Safari/537.36 Edg/79.0.309.43");
+        config.setMaxDownloadSize(2000000000);
         // this folder stores all the data that the crawler needs to store
         config.setCrawlStorageFolder("/tmp/amazon-web-crawler/");
 
