@@ -21,7 +21,7 @@ public class Review {
         return reviewDate;
     }
 
-    public void setReviewDate(String reviewDate) {
+    public void setDate(String reviewDate) {
         this.reviewDate = reviewDate;
     }
 
@@ -37,7 +37,7 @@ public class Review {
         return reviewText;
     }
 
-    public void setReviewText(String reviewText) {
+    public void setBody(String reviewText) {
         this.reviewText = reviewText;
     }
 
@@ -45,7 +45,7 @@ public class Review {
         return reviewTitle;
     }
 
-    public void setReviewTitle(String reviewTitle) {
+    public void setTitle(String reviewTitle) {
         this.reviewTitle = reviewTitle;
     }
 

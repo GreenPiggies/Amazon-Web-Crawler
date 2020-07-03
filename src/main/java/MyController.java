@@ -14,15 +14,6 @@ public class MyController {
     public static void main(String[] args) throws Exception {
 
 
-        //TEST
-
-        File dir = new File("/tmp/");
-        dir.mkdirs();
-
-        File file = new File(".");
-        for(String fileNames : file.list()) System.out.println(fileNames);
-
-        // END TEST
 
 
         CrawlConfig config = new CrawlConfig();
@@ -30,7 +21,7 @@ public class MyController {
         config.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.74 Safari/537.36 Edg/79.0.309.43");
         config.setMaxDownloadSize(2000000000);
         // this folder stores all the data that the crawler needs to store
-        config.setCrawlStorageFolder("/tmp/amazon-web-crawler/");
+        config.setCrawlStorageFolder("/tmp/ebay-web-crawler/");
 
         // a politeness delay, to make sure we don't ping the servers too much
         config.setPolitenessDelay(5000);
@@ -56,7 +47,7 @@ public class MyController {
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
         // add our controller seed (start page)
-        controller.addSeed("https://www.amazon.com/Gaming-Livestream-Chat-Memes-T-Shirt/dp/B07L4J7RF1/");
+        controller.addSeed("https://www.ebay.com/itm/333347117883");
 
         // number of threads used during crawling
         int numberOfCrawlers = 8;

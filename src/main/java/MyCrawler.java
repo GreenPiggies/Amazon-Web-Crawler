@@ -45,7 +45,7 @@ public class MyCrawler extends WebCrawler {
         String href = url.getURL().toLowerCase();
 
         // pretty simple heuristic, visit the page if its an amazon link.
-        return href.startsWith("https://www.amazon.com/") && href.contains("/dp/"); // means its a product
+        return href.startsWith("https://ebay.com") && href.contains("/itm/"); // means its a product
     }
 
     /**
@@ -58,8 +58,6 @@ public class MyCrawler extends WebCrawler {
         /* A lot of this website data isn't used right now, I'm in the process of going through these and figuring out exactly what they are.
          * For now, I'm just printing them out on the logger.
          * */
-
-        JSONObject obj = new JSONObject();
 
         int docid = page.getWebURL().getDocid();
         String url = page.getWebURL().getURL();
@@ -84,10 +82,13 @@ public class MyCrawler extends WebCrawler {
             String text = htmlParseData.getText();
             String html = htmlParseData.getHtml().trim();
 
-            AmazonDataParser parser = new AmazonDataParser(htmlParseData);
+            DataParser parser = new EbayDataParser(htmlParseData);
 
             // this code gets the outgoing URLs, which we want to crawl
             Set<WebURL> links = htmlParseData.getOutgoingUrls();
+            for (WebURL link : links) {
+                System.out.println(link.getURL());
+            }
 
             logger.debug("Text length: {}", text.length());
             logger.debug("Html length: {}", html.length());
@@ -107,17 +108,17 @@ public class MyCrawler extends WebCrawler {
             }
 
             System.out.println("-------");
-            System.out.println("title: " + parser.getTitle());
+            System.out.println("title: " + parser.extractName());
             System.out.println("-------");
-            System.out.println("price: " + parser.getPrice());
+            System.out.println("price: " + parser.extractPrice());
             System.out.println("-------");
             System.out.println("reviews: ");
 
-            for (Review r : parser.getReviews()) {
+            for (Review r : parser.extractReviews()) {
                 System.out.println(r);
             }
             System.out.println("alternate images: ");
-            for (String s : parser.getAlternateImages()) {
+            for (String s : parser.extractAlternateImages()) {
                 System.out.println(s);
             }
 

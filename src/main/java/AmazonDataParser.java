@@ -1,16 +1,14 @@
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
-import edu.uci.ics.crawler4j.url.WebURL;
 
 import javax.xml.bind.DatatypeConverter;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AmazonDataParser implements DataParser {
+public class AmazonDataParser extends DataParser {
 
     private HtmlParseData data;
 
@@ -40,6 +38,7 @@ public class AmazonDataParser implements DataParser {
     List<String> altImages; // local path to alternate images
 
     public AmazonDataParser(HtmlParseData data) {
+        super(data);
         this.data = data;
         html = data.getHtml();
         reviews = new ArrayList<Review>();
@@ -61,7 +60,7 @@ public class AmazonDataParser implements DataParser {
         return strBuilder.toString();
     }
 
-    public List<String> getAlternateImages() {
+    public List<String> extractAlternateImages() {
         Matcher matcher = altImagesHeaderPattern.matcher(html); // find the header for all alt images
         if (matcher.find()) {
             int idx = matcher.end();
@@ -77,7 +76,7 @@ public class AmazonDataParser implements DataParser {
         return altImages;
     }
 
-    public List<Review> getReviews() {
+    public List<Review> extractReviews() {
         Matcher matcher = reviewPattern.matcher(html);
         while (matcher.find()) {
             Review review = new Review();
@@ -85,19 +84,19 @@ public class AmazonDataParser implements DataParser {
             String temp = html.substring(index);
             Matcher tempMatcher = reviewNamePattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
-                review.setName(getContent(reviewNamePattern, temp));
+                review.setName(getContent(reviewNamePattern, temp, '<'));
             }
             tempMatcher = reviewTitlePattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
-                review.setReviewTitle(getContent(reviewTitlePattern, temp));
+                review.setTitle(getContent(reviewTitlePattern, temp, '<'));
             }
             tempMatcher = reviewDatePattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
-                review.setReviewDate(getContent(reviewDatePattern, temp));
+                review.setDate(getContent(reviewDatePattern, temp, '<'));
             }
             tempMatcher = reviewRatingPattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
-                review.setRating(Double.parseDouble(getContent(reviewRatingPattern, temp).substring(0, 3))); // should be something like 3.0 or 4.0
+                review.setRating(Double.parseDouble(getContent(reviewRatingPattern, temp, '<').substring(0, 3))); // should be something like 3.0 or 4.0
             }
             tempMatcher = reviewTextPattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
@@ -110,36 +109,11 @@ public class AmazonDataParser implements DataParser {
                 String text = strBuilder.toString();
                 text.replaceAll("<br>", "\n");
                 text = text.substring(0, text.length() - 7);
-                review.setReviewText(text); // remove the </span> tag
+                review.setBody(text); // remove the </span> tag
             }
             reviews.add(review);
         }
         return reviews;
-    }
-
-    /**
-     * Helper method to extract the html within a given element.
-     * @param p The pattern of the element.
-     * @return A string containing the contents of that element, or null if the specified pattern doesn't exist.
-     */
-    private String getContent(Pattern p, String s) {
-        Matcher matcher = p.matcher(s);
-
-        if (matcher.find()) {
-            int index = matcher.end();
-            StringBuilder strBuilder = new StringBuilder();
-            while (index < s.length()) {
-                char c = s.charAt(index);
-                if (c == '<') {
-                    break;
-                } else {
-                    strBuilder.append(c);
-                    index++;
-                }
-            }
-            return strBuilder.toString().trim();
-        }
-        return null;
     }
 
     /**
@@ -198,14 +172,14 @@ public class AmazonDataParser implements DataParser {
         return path;
     }
 
-    public String getTitle() {
+    public String extractName() {
         if (title == null) {
-            title = getContent(titlePattern, html);
+            title = getContent(titlePattern, html, '<');
         }
         return title;
     }
 
-    public String getMainImage() {
+    public String extractImage() {
         Matcher matcher = mainImagePattern.matcher(html);
         int index = -1;
         while (matcher.find()) {
@@ -215,11 +189,11 @@ public class AmazonDataParser implements DataParser {
         return getImage(html.substring(index));
     }
 
-    public double getPrice() {
+    public double extractPrice() {
         if (price == 0.0) {
-            String temp = getContent(dealPricePattern, html);
+            String temp = getContent(dealPricePattern, html, '<');
             if (temp == null) {
-                temp = getContent(regularPricePattern, html);
+                temp = getContent(regularPricePattern, html, '<');
             }
             price = Double.parseDouble(temp.substring(1));
         }
