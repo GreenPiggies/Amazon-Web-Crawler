@@ -15,9 +15,9 @@ import java.util.regex.Pattern;
 import org.json.simple.*;
 
 /**
- * The MyCrawler class constructs an Amazon Web Crawler that keeps track of the number of pages it has crawled through.
+ * The AmazonCrawler class constructs an Amazon Web Crawler that keeps track of the number of pages it has crawled through.
  */
-public class MyCrawler extends WebCrawler {
+public class AmazonCrawler extends WebCrawler {
 
     // not being used atm, might remove it later
     private static final Pattern WEBSITE_EXTENSIONS = Pattern.compile(".*\\.(org|com|gov)$");
@@ -29,7 +29,7 @@ public class MyCrawler extends WebCrawler {
      * Constructs a MyCrawler object.
      * @param pages An AtomicInteger that keeps track of the number of pages visited by the crawler.
      */
-    public MyCrawler(AtomicInteger pages) {
+    public AmazonCrawler(AtomicInteger pages) {
         seenPages = pages;
     }
 
@@ -45,7 +45,7 @@ public class MyCrawler extends WebCrawler {
         String href = url.getURL().toLowerCase();
 
         // pretty simple heuristic, visit the page if its an amazon link.
-        return href.startsWith("https://ebay.com") && href.contains("/itm/"); // means its a product
+        return href.startsWith("https://amazon.com") && href.contains("/dp/"); // means its a product
     }
 
     /**
@@ -82,7 +82,7 @@ public class MyCrawler extends WebCrawler {
             String text = htmlParseData.getText();
             String html = htmlParseData.getHtml().trim();
 
-            DataParser parser = new EbayDataParser(htmlParseData);
+            DataParser parser = new AmazonDataParser(htmlParseData);
 
             // this code gets the outgoing URLs, which we want to crawl
             Set<WebURL> links = htmlParseData.getOutgoingUrls();
@@ -98,7 +98,7 @@ public class MyCrawler extends WebCrawler {
 
             int num = 0;
             try {
-                PrintWriter writer = new PrintWriter(new FileWriter(new File("test.txt")));
+                PrintWriter writer = new PrintWriter(new FileWriter(new File("amazon_test.txt")));
                 writer.println(html.length());
                 writer.println(html);
                 writer.flush();

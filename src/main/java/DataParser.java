@@ -1,6 +1,5 @@
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +25,7 @@ public abstract class DataParser {
     }
 
     abstract String extractName();
-    abstract String extractImage();
+    abstract String extractMainImage();
     abstract double extractPrice();
     abstract List<Review> extractReviews();
     abstract List<String> extractAlternateImages();
@@ -42,6 +41,7 @@ public abstract class DataParser {
      * @return The aforementioned string, starting from the first instance of the specified pattern to the first occurrence of the specified character.
      */
     public String getContent(Pattern p, String s, char end) {
+        if (p == null || s == null || s.length() == 0) return null;
         Matcher matcher = p.matcher(s);
         if (matcher.find()) { // only need to find one
             int index = matcher.end();
@@ -69,8 +69,8 @@ public abstract class DataParser {
         this.name = name;
     }
 
-    public String getImage() {
-        if (image.equals("")) image = extractImage();
+    public String getMainImage() {
+        if (image.equals("")) image = extractMainImage();
         return image;
     }
 

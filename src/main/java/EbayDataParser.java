@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class EbayDataParser extends DataParser {
     private Pattern namePattern = Pattern.compile("id=\"itemTitle\"><span[^>]+>[^<]+</span>");
     private Pattern bidPricePattern = Pattern.compile("id=\"prcIsum_bidPrice\" itemprop=\"price\" content=\"");
-    private Pattern buyPricePattern = Pattern.compile("id=\"prcIsum\" itemprop=\"price\"  style=\"\" content=\"");
+    private Pattern buyPricePattern = Pattern.compile("id=\"prcIsum\" itemprop=\"price\" style=\"\" content=\"");
     private Pattern mainImagePattern = Pattern.compile("itemprop=\"image\" src=\"");
     private Pattern reviewHeaderPattern = Pattern.compile("<div class=\" ebay-review-section\"[^>]+>");
     private Pattern reviewRatingPattern = Pattern.compile("<div role=\"img\" class=\"ebay-star-rating\" aria-label=\"");
@@ -38,7 +38,7 @@ public class EbayDataParser extends DataParser {
         return Double.parseDouble(getContent(bidPricePattern, getHtml(), '\"').trim());
     }
 
-    public String extractImage() {
+    public String extractMainImage() {
         return getContent(mainImagePattern, getHtml(), '\"');
     }
 

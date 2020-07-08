@@ -4,13 +4,12 @@ import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
-import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * The MyController class is the "runner" class for my web crawler.
+ * The AmazonController class is the "runner" class for my web crawler.
  */
-public class MyController {
+public class AmazonController {
     public static void main(String[] args) throws Exception {
 
 
@@ -47,7 +46,7 @@ public class MyController {
         CrawlController controller = new CrawlController(config, pageFetcher, robotstxtServer);
 
         // add our controller seed (start page)
-        controller.addSeed("https://www.ebay.com/itm/333347117883");
+        controller.addSeed("https://www.amazon.com/Echo-Dot/dp/B07FZ8S74R/");
 
         // number of threads used during crawling
         int numberOfCrawlers = 8;
@@ -56,7 +55,7 @@ public class MyController {
         AtomicInteger numPagesSeen = new AtomicInteger();
 
         // create our factory of web crawlers
-        CrawlController.WebCrawlerFactory<MyCrawler> factory = () -> new MyCrawler(numPagesSeen);
+        CrawlController.WebCrawlerFactory<AmazonCrawler> factory = () -> new AmazonCrawler(numPagesSeen);
 
         // start crawling
         controller.start(factory, numberOfCrawlers);

@@ -1,8 +1,6 @@
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 
-import javax.xml.bind.DatatypeConverter;
-
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -30,8 +28,6 @@ public class AmazonDataParser extends DataParser {
 
 
 
-    private String html;
-
     String title;
     double price;
     List<Review> reviews;
@@ -40,13 +36,8 @@ public class AmazonDataParser extends DataParser {
     public AmazonDataParser(HtmlParseData data) {
         super(data);
         this.data = data;
-        html = data.getHtml();
         reviews = new ArrayList<Review>();
         altImages = new ArrayList<String>();
-    }
-
-    public String print() {
-        return html;
     }
 
     private String getStart(Pattern p) {
@@ -61,27 +52,28 @@ public class AmazonDataParser extends DataParser {
     }
 
     public List<String> extractAlternateImages() {
-        Matcher matcher = altImagesHeaderPattern.matcher(html); // find the header for all alt images
+        if (data.getHtml() == null) return null;
+        Matcher matcher = altImagesHeaderPattern.matcher(data.getHtml()); // find the header for all alt images
         if (matcher.find()) {
             int idx = matcher.end();
-            String altImagesHtml = html.substring(idx);
+            String altImagesHtml = data.getHtml().substring(idx);
             matcher = altImageHeaderPattern.matcher(altImagesHtml);
             while (matcher.find()) {
                 idx = matcher.end();
-                System.out.println(idx);
                 String altImageHtml = altImagesHtml.substring(matcher.end());
-                altImages.add(getImage(altImageHtml));
+                altImages.add(extractImage(altImageHtml));
             }
         }
         return altImages;
     }
 
     public List<Review> extractReviews() {
-        Matcher matcher = reviewPattern.matcher(html);
+        if (data.getHtml() == null) return null;
+        Matcher matcher = reviewPattern.matcher(data.getHtml());
         while (matcher.find()) {
             Review review = new Review();
             int index = matcher.end();
-            String temp = html.substring(index);
+            String temp = data.getHtml().substring(index);
             Matcher tempMatcher = reviewNamePattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
                 review.setName(getContent(reviewNamePattern, temp, '<'));
@@ -121,81 +113,80 @@ public class AmazonDataParser extends DataParser {
      * @param img The String containing the img element.
      * @return The URL of the image, or null if the URL does not exist.
      */
-    private String getImage(String img) {
+    private String extractImage(String img) {
         Matcher matcher = imagePattern.matcher(img);
 
-        String base64 = null;
+        String imgLink = getContent(imagePattern, img, '\"');
 
-        while (matcher.find()) {
-            int index = matcher.end();
-            StringBuilder strBuilder = new StringBuilder();
-            while (index < img.length()) {
-                char c = img.charAt(index);
-                if (c == '\"') {
-                    break;
-                } else {
-                    strBuilder.append(c);
-                    index++;
-                }
-            }
-            base64 = (strBuilder.toString().trim());
-            break;
-        }
-        String path = null;
-        if (base64 == null) {
-            return null;
-        } else {
-            String[] strings = base64.split(",");
-            String extension;
-            switch (strings[0]) {//check image's extension
-                case "data:image/jpeg;base64":
-                    extension = "jpeg";
-                    break;
-                case "data:image/png;base64":
-                    extension = "png";
-                    break;
-                default://should write cases for more images types
-                    extension = "jpg";
-                    break;
-            }
-            //convert base64 string to binary data
-            byte[] data = DatatypeConverter.parseBase64Binary(strings[1]);
-            path = "C:\\Users\\hungw\\Desktop\\" + numImages + "." + extension;
-            File file = new File(path);
-            try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
-                outputStream.write(data);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        numImages++;
-        return path;
+        return imgLink;
+
+        // Side note: weirdly enough, amazon no longer sends alternate images as base64??? So now I'm just printing out the links.
+
+//        String path = null;
+//        if (base64 == null) {
+//            return null;
+//        } else {
+//            String[] strings = base64.split(",");
+//            String extension;
+//            switch (strings[0]) {//check image's extension
+//                case "data:image/jpeg;base64":
+//                    extension = "jpeg";
+//                    break;
+//                case "data:image/png;base64":
+//                    extension = "png";
+//                    break;
+//                default://should write cases for more images types
+//                    extension = "jpg";
+//                    break;
+//            }
+//            //convert base64 string to binary data
+//            byte[] data = DatatypeConverter.parseBase64Binary(strings[1]);
+//            path = "C:\\Users\\hungw\\Desktop\\" + numImages + "." + extension;
+//            File file = new File(path);
+//            try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(file))) {
+//                outputStream.write(data);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        numImages++;
+//        return path;
     }
 
     public String extractName() {
         if (title == null) {
-            title = getContent(titlePattern, html, '<');
+            title = getContent(titlePattern, data.getHtml(), '<');
         }
         return title;
     }
 
-    public String extractImage() {
-        Matcher matcher = mainImagePattern.matcher(html);
+    public String extractMainImage() {
+        if (data.getHtml() == null) return null;
+        Matcher matcher = mainImagePattern.matcher(data.getHtml());
         int index = -1;
-        while (matcher.find()) {
+        if (matcher.find()) {
             index = matcher.end();
-            break;
         }
-        return getImage(html.substring(index));
+        try {
+            return extractImage(data.getHtml().substring(index));
+        } catch (StringIndexOutOfBoundsException | NullPointerException e) {
+            // e.printStackTrace();
+        }
+        return null;
     }
 
     public double extractPrice() {
         if (price == 0.0) {
-            String temp = getContent(dealPricePattern, html, '<');
+            String temp = getContent(dealPricePattern, data.getHtml(), '<');
             if (temp == null) {
-                temp = getContent(regularPricePattern, html, '<');
+                temp = getContent(regularPricePattern, data.getHtml(), '<');
             }
-            price = Double.parseDouble(temp.substring(1));
+            try {
+                price = Double.parseDouble(temp.substring(1));
+            } catch (Exception e) {
+                // no need to take action, price should stay at zero
+                // e.printStackTrace();
+            }
         }
         return price;
     }
