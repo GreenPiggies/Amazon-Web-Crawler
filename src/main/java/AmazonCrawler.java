@@ -42,14 +42,17 @@ public class AmazonCrawler extends WebCrawler {
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         // atm referringPage isn't used, might be used later
+        if (url == null || url.getURL() == null || referringPage == null) return false;
+
         String href = url.getURL().toLowerCase();
 
         // pretty simple heuristic, visit the page if its an amazon link.
-        return href.startsWith("https://amazon.com") && href.contains("/dp/"); // means its a product
+        return href.startsWith("https://www.amazon.com") && href.contains("/dp/"); // means its a product
     }
 
     /**
      * Visits a web page.
+     * Precondition: This web page should be visited and it is not null.
      * @param page The page to be visited.
      */
     @Override
@@ -96,16 +99,16 @@ public class AmazonCrawler extends WebCrawler {
 
             html.replaceAll("[ \t\n\r]+","\n");
 
-            int num = 0;
-            try {
-                PrintWriter writer = new PrintWriter(new FileWriter(new File("amazon_test.txt")));
-                writer.println(html.length());
-                writer.println(html);
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            int num = 0;
+//            try {
+//                PrintWriter writer = new PrintWriter(new FileWriter(new File("amazon_test.txt")));
+//                writer.println(html.length());
+//                writer.println(html);
+//                writer.flush();
+//                writer.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 
             System.out.println("-------");
             System.out.println("title: " + parser.extractName());

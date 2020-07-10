@@ -41,11 +41,12 @@ public class EbayCrawler extends WebCrawler {
      */
     @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
+        if (referringPage == null || url == null || url.getURL() == null) return false;
         // atm referringPage isn't used, might be used later
         String href = url.getURL().toLowerCase();
 
         // pretty simple heuristic, visit the page if its an amazon link.
-        return href.startsWith("https://ebay.com") && href.contains("/itm/"); // means its a product
+        return href.startsWith("https://www.ebay.com") && href.contains("/itm/"); // means its a product
     }
 
     /**
@@ -96,29 +97,30 @@ public class EbayCrawler extends WebCrawler {
 
             html.replaceAll("[ \t\n\r]+","\n");
 
-            int num = 0;
-            try {
-                PrintWriter writer = new PrintWriter(new FileWriter(new File("test.txt")));
-                writer.println(html.length());
-                writer.println(html);
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+//            int num = 0;
+//            try {
+//                PrintWriter writer = new PrintWriter(new FileWriter(new File("ebay_test.txt")));
+//                writer.println(html.length());
+//                writer.println(html);
+//                writer.flush();
+//                writer.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 
             System.out.println("-------");
             System.out.println("title: " + parser.extractName());
             System.out.println("-------");
             System.out.println("price: " + parser.extractPrice());
             System.out.println("-------");
+            System.out.println("main image: " + parser.getMainImage());
             System.out.println("reviews: ");
 
-            for (Review r : parser.extractReviews()) {
+            for (Review r : parser.getReviews()) {
                 System.out.println(r);
             }
             System.out.println("alternate images: ");
-            for (String s : parser.extractAlternateImages()) {
+            for (String s : parser.getAlternateImages()) {
                 System.out.println(s);
             }
 

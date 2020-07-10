@@ -5,7 +5,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 public abstract class DataParser {
     private HtmlParseData data; // so far this is just being used to get the html string, might have future use?
-    private String html;
 
 
 
@@ -17,7 +16,6 @@ public abstract class DataParser {
 
     public DataParser(HtmlParseData data) {
         this.data = data;
-        html = data.getHtml();
         name = image = "";
         price = 0.0;
         reviews = null;
@@ -106,7 +104,7 @@ public abstract class DataParser {
     }
 
     public String getHtml() {
-        return html;
+        return data.getHtml();
     }
 
 }

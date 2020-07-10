@@ -27,15 +27,26 @@ public class EbayDataParser extends DataParser {
     }
 
     public String extractName() {
-        return getContent(namePattern, getHtml(), '<').trim();
+        String name = getContent(namePattern, getHtml(), '<');
+        return (name == null) ? name : name.trim();
     }
 
     public double extractPrice() {
-        return Double.parseDouble(getContent(buyPricePattern, getHtml(), '\"').trim());
+        String price = getContent(buyPricePattern, getHtml(), '\"');
+        return (price == null ? 0.0 : Double.parseDouble(price.trim()));
     }
 
     public double extractBidPrice() {
         return Double.parseDouble(getContent(bidPricePattern, getHtml(), '\"').trim());
+    }
+
+    public double getBidPrice() {
+        if (bidPrice == 0.0) bidPrice = extractBidPrice();
+        return bidPrice;
+    }
+
+    public void setBidPrice(double bidPrice) {
+        this.bidPrice = bidPrice;
     }
 
     public String extractMainImage() {
@@ -43,6 +54,7 @@ public class EbayDataParser extends DataParser {
     }
 
     public List<Review> extractReviews() {
+        if (getHtml() == null) return null;
         Matcher reviewMatcher = reviewHeaderPattern.matcher(getHtml());
         List<Review> reviews = new ArrayList<Review>();
         while (reviewMatcher.find()) {
@@ -61,6 +73,7 @@ public class EbayDataParser extends DataParser {
     }
 
     public List<String> extractAlternateImages() {
+        if (getHtml() == null) return null;
         Matcher altImageMatcher = altImagePattern.matcher(getHtml());
         List<String> altImages = new ArrayList<String>();
         while (altImageMatcher.find()) {
