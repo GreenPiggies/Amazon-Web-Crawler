@@ -99,7 +99,7 @@ public class AmazonDataParser extends DataParser {
                     idx++;
                 }
                 String text = strBuilder.toString();
-                text.replaceAll("<br>", "\n");
+                text.replaceAll("<br />", "\n");
                 text = text.substring(0, text.length() - 7);
                 review.setBody(text); // remove the </span> tag
             }

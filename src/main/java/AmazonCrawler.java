@@ -4,10 +4,10 @@ import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.http.Header;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.net.URLEncoder;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -22,6 +22,8 @@ public class AmazonCrawler extends WebCrawler {
     // not being used atm, might remove it later
     private static final Pattern WEBSITE_EXTENSIONS = Pattern.compile(".*\\.(org|com|gov)$");
 
+    private static final String baseURL = "https://nlp.netbase.com/sentiment?languageTag=en&mode=index&syntax=twitter&text=";
+
     // keeps count on the number of crawled (seen) pages
     private final AtomicInteger seenPages;
 
@@ -31,6 +33,14 @@ public class AmazonCrawler extends WebCrawler {
      */
     public AmazonCrawler(AtomicInteger pages) {
         seenPages = pages;
+    }
+
+    private static String encodeValue(String value) {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex.getCause());
+        }
     }
 
     /**
@@ -87,11 +97,11 @@ public class AmazonCrawler extends WebCrawler {
 
             DataParser parser = new AmazonDataParser(htmlParseData);
 
-            // this code gets the outgoing URLs, which we want to crawl
-            Set<WebURL> links = htmlParseData.getOutgoingUrls();
-            for (WebURL link : links) {
-                System.out.println(link.getURL());
-            }
+//            // this code gets the outgoing URLs, which we want to crawl
+//            Set<WebURL> links = htmlParseData.getOutgoingUrls();
+//            for (WebURL link : links) {
+//                System.out.println(link.getURL());
+//            }
 
             logger.debug("Text length: {}", text.length());
             logger.debug("Html length: {}", html.length());
@@ -119,11 +129,23 @@ public class AmazonCrawler extends WebCrawler {
 
             for (Review r : parser.extractReviews()) {
                 System.out.println(r);
+                String urlEncodedReview = encodeValue(r.getReviewText());
+                String requestURL = baseURL + urlEncodedReview;
+                String data = ReviewProcessor.getSentiment(requestURL);
+                System.out.println(data);
+                try {
+                    Thread.sleep(500);
+                } catch (IllegalArgumentException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+
             }
             System.out.println("alternate images: ");
             for (String s : parser.extractAlternateImages()) {
                 System.out.println(s);
             }
+
+
 
 
 //            System.out.println("main image link: " + parser.getMainImage());
