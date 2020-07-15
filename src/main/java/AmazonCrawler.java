@@ -27,12 +27,16 @@ public class AmazonCrawler extends WebCrawler {
     // keeps count on the number of crawled (seen) pages
     private final AtomicInteger seenPages;
 
+    private PrintWriter writer;
+
+
     /**
      * Constructs a MyCrawler object.
      * @param pages An AtomicInteger that keeps track of the number of pages visited by the crawler.
      */
-    public AmazonCrawler(AtomicInteger pages) {
+    public AmazonCrawler(AtomicInteger pages, PrintWriter writer) {
         seenPages = pages;
+        this.writer = writer;
     }
 
     private static String encodeValue(String value) {
@@ -110,39 +114,51 @@ public class AmazonCrawler extends WebCrawler {
             html.replaceAll("[ \t\n\r]+","\n");
 
 //            int num = 0;
-//            try {
-//                PrintWriter writer = new PrintWriter(new FileWriter(new File("amazon_test.txt")));
-//                writer.println(html.length());
-//                writer.println(html);
-//                writer.flush();
-//                writer.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            try {
+                PrintWriter writer = new PrintWriter(new FileWriter(new File("amazon_test.txt")));
+                writer.println(html.length());
+                writer.println(html);
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             System.out.println("-------");
             System.out.println("title: " + parser.extractName());
             System.out.println("-------");
             System.out.println("price: " + parser.extractPrice());
             System.out.println("-------");
-            System.out.println("reviews: ");
 
-            for (Review r : parser.extractReviews()) {
-                System.out.println(r);
-                String urlEncodedReview = encodeValue(r.getReviewText());
-                String requestURL = baseURL + urlEncodedReview;
-                String data = ReviewProcessor.getSentiment(requestURL);
-                System.out.println(data);
-                try {
-                    Thread.sleep(500);
-                } catch (IllegalArgumentException | InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-            }
             System.out.println("alternate images: ");
             for (String s : parser.extractAlternateImages()) {
                 System.out.println(s);
+            }
+
+            System.out.println("reviews: ");
+
+            for (Review r : parser.extractReviews()) {
+                String reviewText;
+                if (r.getReviewText().length() > 1000) {
+                    reviewText = r.getReviewText().substring(0, 1000);
+                } else {
+                    reviewText = r.getReviewText();
+                }
+                System.out.println(reviewText);
+                String urlEncodedReview = encodeValue(reviewText);
+                String requestURL = baseURL + urlEncodedReview;
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                String data = ReviewProcessor.getSentiment(requestURL);
+                System.out.println("---------");
+                System.out.println(data);
+                System.out.println("---------");
+
+                writer.println(data);
+                writer.flush();
             }
 
 

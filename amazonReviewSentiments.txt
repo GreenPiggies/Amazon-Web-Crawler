@@ -1,0 +1,32 @@
+Action,Activity,Agent,Aspect,AsptQuality,EventType,ObjQuality,Object,Sentiment,SubjQuality,Use
+,,I,,,Positives,,echo dot,love,,
+,make life,,,,Positives,,they,,,
+,,,,,Positives,,,,no few issue,
+,,,,,Positives,helpful device,,,,
+,,,,,Positives,,It,,handy,
+get,,I,,,Positives,,battery base,,,
+take,,I,,,Positives,,it,love,,
+listen to,,I,,,Positives,,music,,,
+listen to,,I,,,Positives,,music,,,
+,,,,,Positives,,that,,only thing,
+
+,,,,,Positives,,2nd generation Echo,happy,,
+add,,I,,,Positives,,this,glad,,
+add,,I,,,Positives,,arsenal,glad,,
+,,,,,Positives,,happy owner,glad,,
+,,,,,Positives,,2nd generation Echo,glad,,
+,,I,,,Positives,,it,pleased,,
+,,,limitation,,Negatives,,it,,,
+,,,,,Positives,,it,,not bad,
+
+use,,we,,,Positives,,them,,,
+,,,,,Positives,,,,like what,
+,,,,,Positives,,they,,compact,how
+,,,,,Positives,easy,They,,,
+,,,,,Positives,,you,,flexible,how
+,,I,,,Positives,,improvement,like,,
+,,,,,Negatives,no high quality speaker system,it,,,
+,,,,,Positives,,it,,pretty good,
+,,,,,Positives,,sub,pretty good sound,,
+,lose,,,,Negatives,,it,,,
+
