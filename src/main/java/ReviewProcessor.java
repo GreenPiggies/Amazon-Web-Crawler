@@ -7,25 +7,43 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
 public class ReviewProcessor {
 
     static String[] keywords = {"Action", "Activity", "Agent", "Aspect", "AsptQuality", "EventType", "ObjQuality", "Object", "Sentiment", "SubjQuality", "Use"};
 
-    public static String getSentiment(String requestURL) {
+    public static Entry getSentiment(Review review, String requestURL) {
+        Entry entry = new Entry();
         try {
+            // first add review info to the entry
+            entry.set("RECORD_ID", review.getRecordID());
+
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+            entry.set("RECORD_DATETIME", dtf.format(now));
+            entry.set("RECORD_URL", requestURL);
+            entry.set("RECORD_TITLE", review.getReviewTitle());
+            entry.set("RECORD_TEXT", review.getReviewText());
+            entry.set("AUTHOR_NAME", review.getName());
+            entry.set("META_TAGS", review.getProductID());
+
+
+            // establish website connection
             URL url = new URL(requestURL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
 
+            // encode authorization and add it to the request header
             String auth = "<redacted>";
             byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
             String authHeaderValue = "Basic " + new String(encodedAuth);
             con.setRequestProperty("Authorization", authHeaderValue);
-
             int status = con.getResponseCode();
 
+            // read in the output
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
             String inputLine;
@@ -34,18 +52,17 @@ public class ReviewProcessor {
                 content.append(inputLine);
             }
             in.close();
-
             con.disconnect();
-
             String info = content.toString();
-
             System.out.println(info);
+
+            // Processing, convert to CSV format
 
             int idx = info.indexOf("\"events\":[[[");
             if (idx == -1) {
                 System.out.println("failure...");
-                return "";
             }
+
             boolean start = false;
             StringBuffer buff = new StringBuffer();
             StringBuffer secondBuff = new StringBuffer();
@@ -84,11 +101,10 @@ public class ReviewProcessor {
                 idx++;
             }
             System.out.println("secondbuff: " + secondBuff.toString());
-            return secondBuff.toString();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "";
+        return entry;
     }
 
     public static void main(String[] args) throws Exception {

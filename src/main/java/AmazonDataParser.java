@@ -1,3 +1,4 @@
+// DONE
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 
 import java.io.IOException;
@@ -7,11 +8,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AmazonDataParser extends DataParser {
-
-    private HtmlParseData data;
-
-    static int numImages = 0;
-
     static final Pattern titlePattern = Pattern.compile("<span id=\"productTitle\".[^>]+>");
     static final Pattern dealPricePattern = Pattern.compile("<span id=\"priceblock_dealprice\"[^>]+>");
     static final Pattern regularPricePattern = Pattern.compile("<span id=\"priceblock_ourprice\"[^>]+>");
@@ -26,29 +22,17 @@ public class AmazonDataParser extends DataParser {
     static final Pattern altImagesHeaderPattern = Pattern.compile("<div id=\"altImages\"[^>]+>");
     static final Pattern altImageHeaderPattern = Pattern.compile("<li class=\"a-spacing-small item\">");
 
-
-
-    String title;
-    double price;
-    List<Review> reviews;
-    List<String> altImages; // local path to alternate images
+    private HtmlParseData data;
+    private String title;
+    private double price;
+    private List<Review> reviews;
+    private List<String> altImages; // local path to alternate images
 
     public AmazonDataParser(HtmlParseData data) {
         super(data);
         this.data = data;
-        reviews = new ArrayList<Review>();
-        altImages = new ArrayList<String>();
-    }
-
-    private String getStart(Pattern p) {
-        String pattern = p.toString();
-        StringBuilder strBuilder = new StringBuilder();
-        int idx = 0;
-        while (idx < pattern.length() && pattern.charAt(idx) != ' ') {
-            strBuilder.append(pattern.charAt(idx));
-            idx++;
-        }
-        return strBuilder.toString();
+        reviews = new ArrayList<>();
+        altImages = new ArrayList<>();
     }
 
     public List<String> extractAlternateImages() {
@@ -100,6 +84,7 @@ public class AmazonDataParser extends DataParser {
                 }
                 String text = strBuilder.toString();
                 text.replaceAll("<br />", "\n");
+                text.replaceAll("\n", " ");
                 text = text.substring(0, text.length() - 7);
                 review.setBody(text); // remove the </span> tag
             }
@@ -185,7 +170,7 @@ public class AmazonDataParser extends DataParser {
                 price = Double.parseDouble(temp.substring(1));
             } catch (Exception e) {
                 // no need to take action, price should stay at zero
-                // e.printStackTrace();
+                e.printStackTrace();
             }
         }
         return price;

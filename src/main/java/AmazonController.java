@@ -19,7 +19,19 @@ public class AmazonController {
 
 
         CrawlConfig config = new CrawlConfig();
-        config.setUserAgentString("please let me run my code");
+
+        // set a random config
+        // of length 10
+        StringBuffer buff = new StringBuffer();
+
+        for (int i = 0; i < 10; i++) {
+            buff.append((char) (Math.random() * 10));
+        }
+
+        config.setUserAgentString(buff.toString());
+
+        config.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.74 Safari/537.36 Edg/79.0.309.43");
+
 
 //        config.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.74 Safari/537.36 Edg/79.0.309.43");
         config.setMaxDownloadSize(2000000000);
@@ -60,7 +72,7 @@ public class AmazonController {
 
         PrintWriter writer = new PrintWriter(new FileWriter(new File("amazonReviewSentiments.txt")));
 
-        writer.println("Action,Activity,Agent,Aspect,AsptQuality,EventType,ObjQuality,Object,Sentiment,SubjQuality,Use");
+        writer.println("RECORD_ID,RECORD_DATETIME,RECORD_URL,RECORD_TUTLE,RECORD_TEXT,DOMAIN_ROOT_URL,CITY_NAME,STATE_CODE,COUNTRY_CODE,GPS_COORDINATES,AUTHOR_ID,AUTHOR_HANDLE,AUTHOR_NAME,AUTHOR_GENDER,AUTHOR_DESCRIPTION,_AUTHOR_PROFILE_URL,AUTHOR_AVATAR_URL,AUTHOR_FOLLOWERS,AUTHOR_VERIFIED_STATUS,META_TAGS,NET_PROMOTER_SCORE,OVERALL_STAR_RATING,OVERALL_SURVEY_SCORE,SOURCE_TYPE");
         writer.flush();
 
 

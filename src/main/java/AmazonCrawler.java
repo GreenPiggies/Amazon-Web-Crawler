@@ -8,11 +8,10 @@ import java.io.*;
 import java.net.URLEncoder;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
-
-import org.json.simple.*;
 
 /**
  * The AmazonCrawler class constructs an Amazon Web Crawler that keeps track of the number of pages it has crawled through.
@@ -76,8 +75,15 @@ public class AmazonCrawler extends WebCrawler {
          * For now, I'm just printing them out on the logger.
          * */
 
+
+
         int docid = page.getWebURL().getDocid();
         String url = page.getWebURL().getURL();
+
+
+
+
+
         String domain = page.getWebURL().getDomain();
         String path = page.getWebURL().getPath();
         String subDomain = page.getWebURL().getSubDomain();
@@ -96,51 +102,65 @@ public class AmazonCrawler extends WebCrawler {
         if (page.getParseData() instanceof HtmlParseData) {
 
             HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
-            String text = htmlParseData.getText();
             String html = htmlParseData.getHtml().trim();
-
             DataParser parser = new AmazonDataParser(htmlParseData);
-
-//            // this code gets the outgoing URLs, which we want to crawl
-//            Set<WebURL> links = htmlParseData.getOutgoingUrls();
-//            for (WebURL link : links) {
-//                System.out.println(link.getURL());
-//            }
-
-            logger.debug("Text length: {}", text.length());
-            logger.debug("Html length: {}", html.length());
-//            logger.debug("Number of outgoing links: {}", links.size());
-
             html.replaceAll("[ \t\n\r]+","\n");
 
 //            int num = 0;
-            try {
-                PrintWriter writer = new PrintWriter(new FileWriter(new File("amazon_test.txt")));
-                writer.println(html.length());
-                writer.println(html);
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+//            try {
+//                PrintWriter writer = new PrintWriter(new FileWriter(new File("amazon_test.txt")));
+//                writer.println(html.length());
+//                writer.println(html);
+//                writer.flush();
+//                writer.close();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+
+            Entry pageEntry = new Entry();
+            pageEntry.set("RECORD_ID", "page " + seenPages);
+
+            // getting the date
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+//            System.out.println(dtf.format(now));
+
+            pageEntry.set("RECORD_DATETIME", dtf.format(now));
+            pageEntry.set("RECORD_URL", url);
+            pageEntry.set("RECORD_TITLE", parser.getName());
+
+            // get product id
+            StringBuffer productIDBuffer = new StringBuffer();
+            int index = url.indexOf("/dp/");
+            while (index < url.length() && url.charAt(index) != '/') {
+                productIDBuffer.append(url.charAt(index));
             }
 
+            pageEntry.set("META_TAGS", productIDBuffer.toString());
+            writer.println(pageEntry.toString());
+
             System.out.println("-------");
-            System.out.println("title: " + parser.extractName());
+            System.out.println("title: " + parser.getName());
             System.out.println("-------");
-            System.out.println("price: " + parser.extractPrice());
+            System.out.println("price: " + parser.getPrice());
             System.out.println("-------");
 
+
+
             System.out.println("alternate images: ");
-            for (String s : parser.extractAlternateImages()) {
+            for (String s : parser.getAlternateImages()) {
                 System.out.println(s);
             }
 
             System.out.println("reviews: ");
 
-            for (Review r : parser.extractReviews()) {
+            int count = 0;
+            for (Review r : parser.getReviews()) {
                 String reviewText;
+                r.setRecordID("page" + seenPages + "-review" + count++);
+                r.setProductID(productIDBuffer.toString());
                 if (r.getReviewText().length() > 1000) {
-                    reviewText = r.getReviewText().substring(0, 1000);
+                    reviewText = r.getReviewText().substring(0, 1000); // truncate to 1000 characters
                 } else {
                     reviewText = r.getReviewText();
                 }
@@ -152,12 +172,12 @@ public class AmazonCrawler extends WebCrawler {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                String data = ReviewProcessor.getSentiment(requestURL);
+                Entry reviewEntry = ReviewProcessor.getSentiment(r, requestURL);
                 System.out.println("---------");
-                System.out.println(data);
+                System.out.println(reviewEntry);
                 System.out.println("---------");
 
-                writer.println(data);
+                writer.println(reviewEntry);
                 writer.flush();
             }
 
