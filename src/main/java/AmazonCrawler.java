@@ -128,15 +128,18 @@ public class AmazonCrawler extends WebCrawler {
             pageEntry.set("RECORD_DATETIME", dtf.format(now));
             pageEntry.set("RECORD_URL", url);
             pageEntry.set("RECORD_TITLE", parser.getName());
+            pageEntry.set("META_TAGS2", "AmazonReview");
 
             // get product id
             StringBuffer productIDBuffer = new StringBuffer();
-            int index = url.indexOf("/dp/");
-            while (index < url.length() && url.charAt(index) != '/') {
+            int index = url.indexOf("/dp/") + 4;
+            while (index < url.length() && url.charAt(index) != '/' && url.charAt(index) != '?') {
                 productIDBuffer.append(url.charAt(index));
+                index++;
             }
 
             pageEntry.set("META_TAGS", productIDBuffer.toString());
+            System.out.println("META TAG: " + productIDBuffer.toString());
             writer.println(pageEntry.toString());
 
             System.out.println("-------");
@@ -173,6 +176,7 @@ public class AmazonCrawler extends WebCrawler {
                     e.printStackTrace();
                 }
                 Entry reviewEntry = ReviewProcessor.getSentiment(r, requestURL);
+                reviewEntry.set("META_TAGS2", "AmazonReview");
                 System.out.println("---------");
                 System.out.println(reviewEntry);
                 System.out.println("---------");

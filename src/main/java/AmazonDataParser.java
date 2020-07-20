@@ -77,6 +77,7 @@ public class AmazonDataParser extends DataParser {
             tempMatcher = reviewTextPattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
                 StringBuilder strBuilder = new StringBuilder();
+
                 int idx = tempMatcher.end();
                 while (idx < temp.length() && (strBuilder.toString().length() < 7 || !strBuilder.toString().substring(strBuilder.length() - 7, strBuilder.length()).equals("</span>"))) {
                     strBuilder.append(temp.charAt(idx));

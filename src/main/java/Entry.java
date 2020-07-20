@@ -26,6 +26,7 @@ public class Entry {
         mp.put("AUTHOR_FOLLOWERS", "");
         mp.put("AUTHORS_VERIFIED_STATUS", "");
         mp.put("META_TAGS", "");
+        mp.put("META_TAGS2", "");
         mp.put("NET_PROMOTER_SCORE", "");
         mp.put("OVERALL_STAR_RATING", "");
         mp.put("OVERALL_SURVEY_SCORE", "");
@@ -40,7 +41,13 @@ public class Entry {
     public String toString() {
         StringBuffer buff = new StringBuffer();
         for (String key : mp.keySet()) {
-            buff.append(mp.get(key) + ',');
+            String value = mp.get(key);
+            if (value.startsWith("<")) {
+                return "";
+            }
+            value = value.replaceAll("\"", "\"\"");
+            value = "\"" + value + "\"";
+            buff.append(value + ',');
         }
         return buff.toString().substring(0, buff.toString().length() - 1); // remove the final comma
     }
