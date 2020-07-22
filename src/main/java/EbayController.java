@@ -4,6 +4,9 @@ import edu.uci.ics.crawler4j.fetcher.PageFetcher;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtConfig;
 import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -54,8 +57,13 @@ public class EbayController{
         // construct a new AtomicInteger, which we will use to keep track of the number of pages seem.
         AtomicInteger numPagesSeen = new AtomicInteger();
 
+        PrintWriter writer = new PrintWriter(new FileWriter(new File("ebaySentimentsReview.txt")));
+
+        writer.println("RECORD_ID,RECORD_DATETIME,RECORD_URL,RECORD_TITLE,RECORD_TEXT,DOMAIN_ROOT_URL,CITY_NAME,STATE_CODE,COUNTRY_CODE,GPS_COORDINATES,AUTHOR_ID,AUTHOR_HANDLE,AUTHOR_NAME,AUTHOR_GENDER,AUTHOR_DESCRIPTION,_AUTHOR_PROFILE_URL,AUTHOR_AVATAR_URL,AUTHOR_FOLLOWERS,AUTHOR_VERIFIED_STATUS,META_TAGS,META_TAGS2,NET_PROMOTER_SCORE,OVERALL_STAR_RATING,OVERALL_SURVEY_SCORE,SOURCE_TYPE");
+        writer.flush();
+
         // create our factory of web crawlers
-        CrawlController.WebCrawlerFactory<EbayCrawler> factory = () -> new EbayCrawler(numPagesSeen);
+        CrawlController.WebCrawlerFactory<EbayCrawler> factory = () -> new EbayCrawler(numPagesSeen, writer);
 
         // start crawling
         controller.start(factory, numberOfCrawlers);

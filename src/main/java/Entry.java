@@ -41,7 +41,9 @@ public class Entry {
     public String toString() {
         StringBuffer buff = new StringBuffer();
         for (String key : mp.keySet()) {
+            System.out.println(key);
             String value = mp.get(key);
+            System.out.println(value);
             if (value.startsWith("<")) {
                 return "";
             }

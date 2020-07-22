@@ -1,7 +1,6 @@
 // DONE
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -16,11 +15,13 @@ public class AmazonDataParser extends DataParser {
     static final Pattern reviewPattern = Pattern.compile("data-hook=\"review\"[^>]+>");
     static final Pattern reviewNamePattern = Pattern.compile("<span class=\"a-profile-name\">");
     static final Pattern reviewTitlePattern = Pattern.compile("<a data-hook=\"review-title\"[^>]+>[^<]+<span>");
+    static final Pattern reviewURLPattern = Pattern.compile("<a data-hook=\"review-title\"");
     static final Pattern reviewDatePattern = Pattern.compile("<span data-hook=\"review-date\"[^>]+>");
     static final Pattern reviewTextPattern = Pattern.compile("<div data-hook=\"review-collapsed\"[^>]+>[^<]+<span>");
     static final Pattern reviewRatingPattern = Pattern.compile("<i data-hook=\"review-star-rating\"[^>]+><span[^>]+>");
     static final Pattern altImagesHeaderPattern = Pattern.compile("<div id=\"altImages\"[^>]+>");
     static final Pattern altImageHeaderPattern = Pattern.compile("<li class=\"a-spacing-small item\">");
+    static final Pattern URLPattern = Pattern.compile("href=\"");
 
     private HtmlParseData data;
     private String title;
@@ -52,8 +53,12 @@ public class AmazonDataParser extends DataParser {
     }
 
     public List<Review> extractReviews() {
+        // if data is null, return null
         if (data.getHtml() == null) return null;
+
+        // setup matcher to find review headers
         Matcher matcher = reviewPattern.matcher(data.getHtml());
+        // for each review
         while (matcher.find()) {
             Review review = new Review();
             int index = matcher.end();
@@ -62,13 +67,20 @@ public class AmazonDataParser extends DataParser {
             if (tempMatcher.find()) { // should happen
                 review.setName(getContent(reviewNamePattern, temp, '<'));
             }
+            tempMatcher = reviewURLPattern.matcher(temp);
+            if (tempMatcher.find()) {
+                String temp2 = temp.substring(tempMatcher.end());
+                review.setReviewURL("https://www.amazon.com" + getContent(URLPattern, temp2, '\"'));
+            }
             tempMatcher = reviewTitlePattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
                 review.setTitle(getContent(reviewTitlePattern, temp, '<'));
             }
             tempMatcher = reviewDatePattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
-                review.setDate(getContent(reviewDatePattern, temp, '<'));
+                String date = getContent(reviewDatePattern, temp, '<');
+                String[] arr = date.split(" ");
+                review.setDate(arr[arr.length - 3] + " " + arr[arr.length - 2] + " " + arr[arr.length - 1]);
             }
             tempMatcher = reviewRatingPattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
@@ -87,7 +99,7 @@ public class AmazonDataParser extends DataParser {
                 text.replaceAll("<br />", "\n");
                 text.replaceAll("\n", " ");
                 text = text.substring(0, text.length() - 7);
-                review.setBody(text); // remove the </span> tag
+                review.setReviewText(text); // remove the </span> tag
             }
             reviews.add(review);
         }

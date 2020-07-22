@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertFalse;
@@ -23,7 +24,7 @@ public class TestEbayCrawler {
     @Before
     public void setup() {
         seenPages = new AtomicInteger();
-        crawler = new EbayCrawler(seenPages);
+        crawler = new EbayCrawler(seenPages, mock(PrintWriter.class));
         url = mock(WebURL.class);
         testURL = "https://www.ebay.com/itm/Logitech-G640-Large-Cloth-Gaming-Mousepad/303427616970";
     }

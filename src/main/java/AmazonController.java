@@ -19,18 +19,18 @@ public class AmazonController {
 
 
         CrawlConfig config = new CrawlConfig();
+//
+//        // set a random config
+//        // of length 10
+//        StringBuffer buff = new StringBuffer();
+//
+//        for (int i = 0; i < 10; i++) {
+//            buff.append((char) (Math.random() * 10));
+//        }
+//
+//        config.setUserAgentString(buff.toString());
 
-        // set a random config
-        // of length 10
-        StringBuffer buff = new StringBuffer();
-
-        for (int i = 0; i < 10; i++) {
-            buff.append((char) (Math.random() * 10));
-        }
-
-        config.setUserAgentString(buff.toString());
-
-        config.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.74 Safari/537.36 Edg/79.0.309.43");
+        config.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.89 Safari/537.36 Edg/84.0.522.40");
 
 
 //        config.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.74 Safari/537.36 Edg/79.0.309.43");

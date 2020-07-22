@@ -6,9 +6,7 @@ public class Review {
     private double rating;
     private String productID;
     private String recordID;
-
-
-
+    private String reviewURL;
     private String reviewDate;
 
     public Review() {
@@ -19,6 +17,7 @@ public class Review {
         reviewDate = "";
         productID = "";
         recordID = "";
+        reviewURL = "";
     }
 
     public String getReviewDate() {
@@ -41,7 +40,7 @@ public class Review {
         return reviewText;
     }
 
-    public void setBody(String reviewText) {
+    public void setReviewText(String reviewText) {
         this.reviewText = reviewText;
     }
 
@@ -73,6 +72,12 @@ public class Review {
         this.recordID = id;
     }
 
+    public String getReviewURL() { return reviewURL; }
+
+    public void setReviewURL(String reviewURL) {
+        this.reviewURL = reviewURL;
+    }
+
     public String toString() {
         return "----------\n"
         + "id: " + productID + "\n"
@@ -80,7 +85,8 @@ public class Review {
         + "rating: " + rating + "\n"
         + "review date: " + reviewDate + "\n"
         + "review title: " + reviewTitle + "\n"
-        + "review text: " + reviewText + "\n";
+        + "review text: " + reviewText + "\n"
+        + "review URL: " + reviewURL + "\n";
     }
 
 

@@ -21,11 +21,9 @@ public class ReviewProcessor {
             // first add review info to the entry
             entry.set("RECORD_ID", review.getRecordID());
 
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-            LocalDateTime now = LocalDateTime.now();
-            entry.set("RECORD_DATETIME", dtf.format(now));
-            entry.set("RECORD_URL", requestURL);
+            entry.set("RECORD_DATETIME", review.getReviewDate());
             entry.set("RECORD_TITLE", review.getReviewTitle());
+            entry.set("RECORD_URL", review.getReviewURL());
             entry.set("RECORD_TEXT", review.getReviewText());
             entry.set("AUTHOR_NAME", review.getName());
             entry.set("META_TAGS", review.getProductID());

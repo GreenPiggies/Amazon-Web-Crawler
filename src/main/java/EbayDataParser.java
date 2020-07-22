@@ -66,7 +66,7 @@ public class EbayDataParser extends DataParser {
             review.setName(getContent(reviewNamePattern, temp, '\"'));
             review.setDate(getContent(reviewDatePattern, temp, '\"'));
             review.setTitle(getContent(reviewTitlePattern, temp, '<'));
-            review.setBody(getContent(reviewBodyPattern, temp, '<'));
+            review.setReviewText(getContent(reviewBodyPattern, temp, '<'));
             reviews.add(review);
         }
         return reviews;

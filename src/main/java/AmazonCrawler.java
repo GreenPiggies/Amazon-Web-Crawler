@@ -101,6 +101,9 @@ public class AmazonCrawler extends WebCrawler {
         // making sure the webpage is parseable
         if (page.getParseData() instanceof HtmlParseData) {
 
+            logger.debug("Pages visited: " + seenPages.incrementAndGet());
+
+
             HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
             String html = htmlParseData.getHtml().trim();
             DataParser parser = new AmazonDataParser(htmlParseData);
@@ -118,14 +121,7 @@ public class AmazonCrawler extends WebCrawler {
 //            }
 
             Entry pageEntry = new Entry();
-            pageEntry.set("RECORD_ID", "page " + seenPages);
-
-            // getting the date
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-            LocalDateTime now = LocalDateTime.now();
-//            System.out.println(dtf.format(now));
-
-            pageEntry.set("RECORD_DATETIME", dtf.format(now));
+            pageEntry.set("RECORD_ID", "page" + seenPages);
             pageEntry.set("RECORD_URL", url);
             pageEntry.set("RECORD_TITLE", parser.getName());
             pageEntry.set("META_TAGS2", "AmazonReview");
@@ -133,6 +129,7 @@ public class AmazonCrawler extends WebCrawler {
             // get product id
             StringBuffer productIDBuffer = new StringBuffer();
             int index = url.indexOf("/dp/") + 4;
+            System.out.println(index);
             while (index < url.length() && url.charAt(index) != '/' && url.charAt(index) != '?') {
                 productIDBuffer.append(url.charAt(index));
                 index++;
@@ -167,7 +164,7 @@ public class AmazonCrawler extends WebCrawler {
                 } else {
                     reviewText = r.getReviewText();
                 }
-                System.out.println(reviewText);
+                r.setReviewText(reviewText);
                 String urlEncodedReview = encodeValue(reviewText);
                 String requestURL = baseURL + urlEncodedReview;
                 try {
@@ -219,7 +216,6 @@ public class AmazonCrawler extends WebCrawler {
         }
 
         // printout for the number of pages visited so far.
-        logger.debug("Pages visited: " + seenPages.incrementAndGet());
 
         logger.debug("=============");
     }

@@ -4,12 +4,12 @@ import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
 import org.apache.http.Header;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.json.simple.*;
@@ -19,18 +19,26 @@ import org.json.simple.*;
  */
 public class EbayCrawler extends WebCrawler {
 
+    private static Pattern productIDPattern = Pattern.compile("itm/[^/]+/");
+
     // not being used atm, might remove it later
     private static final Pattern WEBSITE_EXTENSIONS = Pattern.compile(".*\\.(org|com|gov)$");
 
     // keeps count on the number of crawled (seen) pages
     private final AtomicInteger seenPages;
 
+    private static final String baseURL = "https://nlp.netbase.com/sentiment?languageTag=en&mode=index&syntax=twitter&text=";
+
+    private PrintWriter writer;
+
+
     /**
      * Constructs a MyCrawler object.
      * @param pages An AtomicInteger that keeps track of the number of pages visited by the crawler.
      */
-    public EbayCrawler(AtomicInteger pages) {
+    public EbayCrawler(AtomicInteger pages, PrintWriter writer) {
         seenPages = pages;
+        this.writer = writer;
     }
 
     /**
@@ -47,6 +55,14 @@ public class EbayCrawler extends WebCrawler {
 
         // pretty simple heuristic, visit the page if its an amazon link.
         return href.startsWith("https://www.ebay.com") && href.contains("/itm/"); // means its a product
+    }
+
+    private static String encodeValue(String value) {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex.getCause());
+        }
     }
 
     /**
@@ -79,6 +95,9 @@ public class EbayCrawler extends WebCrawler {
         // making sure the webpage is parseable
         if (page.getParseData() instanceof HtmlParseData) {
 
+            logger.debug("Pages visited: " + seenPages.incrementAndGet());
+
+
             HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
             String text = htmlParseData.getText();
             String html = htmlParseData.getHtml().trim();
@@ -97,16 +116,29 @@ public class EbayCrawler extends WebCrawler {
 
             html.replaceAll("[ \t\n\r]+","\n");
 
-//            int num = 0;
-//            try {
-//                PrintWriter writer = new PrintWriter(new FileWriter(new File("ebay_test.txt")));
-//                writer.println(html.length());
-//                writer.println(html);
-//                writer.flush();
-//                writer.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            Entry pageEntry = new Entry();
+            pageEntry.set("RECORD_ID", "page" + seenPages);
+            pageEntry.set("RECORD_URL", url);
+            pageEntry.set("RECORD_TITLE", parser.getName());
+            pageEntry.set("META_TAGS2", "EbayReview");
+
+            // product ID
+            Matcher temp = productIDPattern.matcher(url);
+            String productID = "";
+            int index = -1;
+            if (temp.find()) {
+                index = temp.end();
+            }
+            StringBuffer buff = new StringBuffer();
+            while (index < url.length() && url.charAt(index) != '/' && url.charAt(index) != '?') {
+                buff.append(url.charAt(index));
+                index++;
+            }
+            productID = buff.toString();
+            pageEntry.set("META_TAGS", productID);
+
+            writer.println(pageEntry);
+            writer.flush();
 
             System.out.println("-------");
             System.out.println("title: " + parser.extractName());
@@ -116,7 +148,34 @@ public class EbayCrawler extends WebCrawler {
             System.out.println("main image: " + parser.getMainImage());
             System.out.println("reviews: ");
 
+            int count = 0;
             for (Review r : parser.getReviews()) {
+                String reviewText;
+                r.setRecordID("page" + seenPages + "-review" + count++);
+                r.setProductID(productID);
+                if (r.getReviewText().length() > 1000) {
+                    reviewText = r.getReviewText().substring(0, 1000); // truncate to 1000 characters
+                } else {
+                    reviewText = r.getReviewText();
+                }
+                r.setReviewText(reviewText);
+                String urlEncodedReview = encodeValue(reviewText);
+                String requestURL = baseURL + urlEncodedReview;
+
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                Entry reviewEntry = ReviewProcessor.getSentiment(r, requestURL);
+                reviewEntry.set("META_TAGS2", "EbayReview");
+                System.out.println("---------");
+                System.out.println(reviewEntry);
+                System.out.println("---------");
+
+                writer.println(reviewEntry);
+                writer.flush();
+
                 System.out.println(r);
             }
             System.out.println("alternate images: ");
@@ -125,21 +184,6 @@ public class EbayCrawler extends WebCrawler {
             }
 
 
-//            System.out.println("main image link: " + parser.getMainImage());
-
-//            // JSON CODE
-//            obj.put("Name", parser.getTitle());
-//            obj.put("Price", "$" + parser.getPrice());
-//
-//            try {
-//                File file = new File("D:\\tmp-json\\" + docid + ".json");
-//                file.createNewFile();
-//                FileWriter fileWriter = new FileWriter(file);
-//                fileWriter.write(obj.toJSONString());
-//                fileWriter.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
 
         }
 
@@ -151,9 +195,6 @@ public class EbayCrawler extends WebCrawler {
                 logger.debug("\t{}: {}", header.getName(), header.getValue());
             }
         }
-
-        // printout for the number of pages visited so far.
-        logger.debug("Pages visited: " + seenPages.incrementAndGet());
 
         logger.debug("=============");
     }
