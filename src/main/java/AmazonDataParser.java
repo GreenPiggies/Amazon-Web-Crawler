@@ -180,7 +180,8 @@ public class AmazonDataParser extends DataParser {
                 temp = getContent(regularPricePattern, data.getHtml(), '<');
             }
             try {
-                price = Double.parseDouble(temp.substring(1));
+                if (temp == null || temp.length() == 0) price = 0;
+                else price = Double.parseDouble(temp.substring(1));
             } catch (Exception e) {
                 // no need to take action, price should stay at zero
                 e.printStackTrace();

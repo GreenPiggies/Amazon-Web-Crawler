@@ -90,7 +90,7 @@ public class TestAmazonDataParser {
     @Test
     public void testGetMainImageValidHTML() {
         when(data.getHtml()).thenReturn(testHtml);
-        assertEquals("https://images-na.ssl-images-amazon.com/images/I/61MZfowYoaL._AC_SY300_.jpg", parser.getMainImage());
+        assertEquals("https://images-na.ssl-images-amazon.com/images/I/61qDKbBlcgL._AC_SY300_.jpg", parser.getMainImage());
     }
 
     @Test

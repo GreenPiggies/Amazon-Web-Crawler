@@ -17,6 +17,7 @@ public class ReviewProcessor {
 
     public static Entry getSentiment(Review review, String requestURL) {
         Entry entry = new Entry();
+        if (review == null || requestURL == null) return entry;
         try {
             // first add review info to the entry
             entry.set("RECORD_ID", review.getRecordID());

@@ -34,8 +34,16 @@ public class Entry {
     }
 
     public void set(String key, String value) {
-        // assuming key exists
-        mp.replace(key, value);
+        if (key != null && mp.keySet().contains(key)) {
+            mp.replace(key, value);
+        }
+    }
+
+    public String get(String key) {
+        if (key != null && mp.keySet().contains(key)) {
+            return mp.get(key);
+        }
+        return null;
     }
 
     public String toString() {
