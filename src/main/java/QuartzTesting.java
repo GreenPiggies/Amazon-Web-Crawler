@@ -37,11 +37,6 @@ public class QuartzTesting {
                         .repeatForever())
                 .build();
 
-        JobDetail job2 = newJob(DumbJob.class)
-                .withIdentity("myJob", "group1") // name "myJob", group "group1"
-                .usingJobData("jobSays", "Hello World!")
-                .usingJobData("myFloatValue", 3.141f)
-                .build();
 
 
         // Tell quartz to schedule the job using our trigger

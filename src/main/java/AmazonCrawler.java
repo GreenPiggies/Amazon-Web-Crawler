@@ -52,7 +52,6 @@ public class AmazonCrawler extends WebCrawler {
      * @param url The specified URL.
      * @return True if the URL should be visited, false otherwise.
      */
-    @Override
     public boolean shouldVisit(Page referringPage, WebURL url) {
         // atm referringPage isn't used, might be used later
         if (url == null || url.getURL() == null || referringPage == null) return false;
@@ -106,8 +105,8 @@ public class AmazonCrawler extends WebCrawler {
 
             HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
             String html = htmlParseData.getHtml().trim();
-            DataParser parser = new AmazonDataParser(htmlParseData);
             html.replaceAll("[ \t\n\r]+","\n");
+            DataParser parser = new AmazonDataParser(html);
 
 //            int num = 0;
 //            try {

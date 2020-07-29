@@ -23,25 +23,23 @@ public class AmazonDataParser extends DataParser {
     static final Pattern altImageHeaderPattern = Pattern.compile("<li class=\"a-spacing-small item\">");
     static final Pattern URLPattern = Pattern.compile("href=\"");
 
-    private HtmlParseData data;
     private String title;
     private double price;
     private List<Review> reviews;
     private List<String> altImages; // local path to alternate images
 
-    public AmazonDataParser(HtmlParseData data) {
-        super(data);
-        this.data = data;
+    public AmazonDataParser(String html) {
+        super(html);
         reviews = new ArrayList<>();
         altImages = new ArrayList<>();
     }
 
     public List<String> extractAlternateImages() {
-        if (data.getHtml() == null) return null;
-        Matcher matcher = altImagesHeaderPattern.matcher(data.getHtml()); // find the header for all alt images
+        if (getHtml() == null) return null;
+        Matcher matcher = altImagesHeaderPattern.matcher(getHtml()); // find the header for all alt images
         if (matcher.find()) {
             int idx = matcher.end();
-            String altImagesHtml = data.getHtml().substring(idx);
+            String altImagesHtml = getHtml().substring(idx);
             matcher = altImageHeaderPattern.matcher(altImagesHtml);
             while (matcher.find()) {
                 idx = matcher.end();
@@ -54,15 +52,15 @@ public class AmazonDataParser extends DataParser {
 
     public List<Review> extractReviews() {
         // if data is null, return null
-        if (data.getHtml() == null) return null;
+        if (getHtml() == null) return null;
 
         // setup matcher to find review headers
-        Matcher matcher = reviewPattern.matcher(data.getHtml());
+        Matcher matcher = reviewPattern.matcher(getHtml());
         // for each review
         while (matcher.find()) {
             Review review = new Review();
             int index = matcher.end();
-            String temp = data.getHtml().substring(index);
+            String temp = getHtml().substring(index);
             Matcher tempMatcher = reviewNamePattern.matcher(temp);
             if (tempMatcher.find()) { // should happen
                 review.setName(getContent(reviewNamePattern, temp, '<'));
@@ -153,20 +151,20 @@ public class AmazonDataParser extends DataParser {
 
     public String extractName() {
         if (title == null) {
-            title = getContent(titlePattern, data.getHtml(), '<');
+            title = getContent(titlePattern, getHtml(), '<');
         }
         return title;
     }
 
     public String extractMainImage() {
-        if (data.getHtml() == null) return null;
-        Matcher matcher = mainImagePattern.matcher(data.getHtml());
+        if (getHtml() == null) return null;
+        Matcher matcher = mainImagePattern.matcher(getHtml());
         int index = -1;
         if (matcher.find()) {
             index = matcher.end();
         }
         try {
-            return extractImage(data.getHtml().substring(index));
+            return extractImage(getHtml().substring(index));
         } catch (StringIndexOutOfBoundsException | NullPointerException e) {
             // e.printStackTrace();
         }
@@ -175,9 +173,9 @@ public class AmazonDataParser extends DataParser {
 
     public double extractPrice() {
         if (price == 0.0) {
-            String temp = getContent(dealPricePattern, data.getHtml(), '<');
+            String temp = getContent(dealPricePattern, getHtml(), '<');
             if (temp == null) {
-                temp = getContent(regularPricePattern, data.getHtml(), '<');
+                temp = getContent(regularPricePattern, getHtml(), '<');
             }
             try {
                 if (temp == null || temp.length() == 0) price = 0;

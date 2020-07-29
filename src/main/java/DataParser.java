@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 public abstract class DataParser {
-    private HtmlParseData data; // so far this is just being used to get the html string, might have future use?
-
+    private String html;
 
 
     private String name;
@@ -14,8 +13,8 @@ public abstract class DataParser {
     private List<Review> reviews;
     private List<String> alternateImages;
 
-    public DataParser(HtmlParseData data) {
-        this.data = data;
+    public DataParser(String html) {
+        this.html = html;
         name = image = "";
         price = 0.0;
         reviews = null;
@@ -35,7 +34,7 @@ public abstract class DataParser {
      * Precondition: Pattern p is present in String s.
      * @param p A regex pattern.
      * @param s The string to search.
-     * @param c End character.
+     * @param end End character.
      * @return The aforementioned string, starting from the first instance of the specified pattern to the first occurrence of the specified character.
      */
     public String getContent(Pattern p, String s, char end) {
@@ -104,7 +103,7 @@ public abstract class DataParser {
     }
 
     public String getHtml() {
-        return data.getHtml();
+        return html;
     }
 
 }
