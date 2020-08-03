@@ -102,7 +102,7 @@ public class EbayCrawler extends WebCrawler {
             String text = htmlParseData.getText();
             String html = htmlParseData.getHtml().trim();
 
-            DataParser parser = new EbayDataParser(htmlParseData);
+            DataParser parser = new EbayDataParser(html);
 
             // this code gets the outgoing URLs, which we want to crawl
             Set<WebURL> links = htmlParseData.getOutgoingUrls();

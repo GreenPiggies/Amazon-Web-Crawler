@@ -36,70 +36,70 @@ public class ReviewProcessor {
             con.setRequestMethod("GET");
 
             // encode authorization and add it to the request header
-            String auth = "<redacted>";
-            byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
-            String authHeaderValue = "Basic " + new String(encodedAuth);
-            con.setRequestProperty("Authorization", authHeaderValue);
-            int status = con.getResponseCode();
-
-            // read in the output
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            in.close();
-            con.disconnect();
-            String info = content.toString();
-            System.out.println(info);
-
-            // Processing, convert to CSV format
-
-            int idx = info.indexOf("\"events\":[[[");
-            if (idx == -1) {
-                System.out.println("failure...");
-            }
-
-            boolean start = false;
-            StringBuffer buff = new StringBuffer();
-            StringBuffer secondBuff = new StringBuffer();
-            while (idx < info.length()) {
-
-                if (info.charAt(idx) == '{') {
-                    start = true;
-                } else if (info.charAt(idx) == '}' && start) { // end of event
-                    start = false;
-                    String event = buff.toString().substring(1);
-                    buff = new StringBuffer();
-                    System.out.println(event);
-                    // reuse buff
-                    for (int i = 0; i < keywords.length; i++) {
-                        StringBuffer thirdBuff = new StringBuffer();
-                        int j = event.indexOf(keywords[i]);
-                        if (j != -1) {
-                            System.out.println(j);
-                            j += 3 + keywords[i].length();
-                            while (event.charAt(j) != '\"') {
-                                thirdBuff.append(event.charAt(j));
-                                j++;
-                            }
-                            System.out.println("thirdbuff: " + thirdBuff.toString());
-                        }
-
-                        buff.append(thirdBuff.toString() + ",");
-                    }
-                    System.out.println("buff: " + buff.toString());
-                    secondBuff.append(buff.toString().substring(0, buff.toString().length() - 1) + '\n'); // remove dangling apostrophe
-                    buff = new StringBuffer();
-                }
-                if (start) {
-                    buff.append(info.charAt(idx));
-                }
-                idx++;
-            }
-            System.out.println("secondbuff: " + secondBuff.toString());
+//            String auth = "<redacted>";
+//            byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
+//            String authHeaderValue = "Basic " + new String(encodedAuth);
+//            con.setRequestProperty("Authorization", authHeaderValue);
+//            int status = con.getResponseCode();
+//
+//            // read in the output
+//            BufferedReader in = new BufferedReader(
+//                    new InputStreamReader(con.getInputStream()));
+//            String inputLine;
+//            StringBuffer content = new StringBuffer();
+//            while ((inputLine = in.readLine()) != null) {
+//                content.append(inputLine);
+//            }
+//            in.close();
+//            con.disconnect();
+//            String info = content.toString();
+//            System.out.println(info);
+//
+//            // Processing, convert to CSV format
+//
+//            int idx = info.indexOf("\"events\":[[[");
+//            if (idx == -1) {
+//                System.out.println("failure...");
+//            }
+//
+//            boolean start = false;
+//            StringBuffer buff = new StringBuffer();
+//            StringBuffer secondBuff = new StringBuffer();
+//            while (idx < info.length()) {
+//
+//                if (info.charAt(idx) == '{') {
+//                    start = true;
+//                } else if (info.charAt(idx) == '}' && start) { // end of event
+//                    start = false;
+//                    String event = buff.toString().substring(1);
+//                    buff = new StringBuffer();
+//                    System.out.println(event);
+//                    // reuse buff
+//                    for (int i = 0; i < keywords.length; i++) {
+//                        StringBuffer thirdBuff = new StringBuffer();
+//                        int j = event.indexOf(keywords[i]);
+//                        if (j != -1) {
+//                            System.out.println(j);
+//                            j += 3 + keywords[i].length();
+//                            while (event.charAt(j) != '\"') {
+//                                thirdBuff.append(event.charAt(j));
+//                                j++;
+//                            }
+//                            System.out.println("thirdbuff: " + thirdBuff.toString());
+//                        }
+//
+//                        buff.append(thirdBuff.toString() + ",");
+//                    }
+//                    System.out.println("buff: " + buff.toString());
+//                    secondBuff.append(buff.toString().substring(0, buff.toString().length() - 1) + '\n'); // remove dangling apostrophe
+//                    buff = new StringBuffer();
+//                }
+//                if (start) {
+//                    buff.append(info.charAt(idx));
+//                }
+//                idx++;
+//            }
+//            System.out.println("secondbuff: " + secondBuff.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }

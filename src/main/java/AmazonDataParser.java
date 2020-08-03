@@ -22,20 +22,17 @@ public class AmazonDataParser extends DataParser {
     static final Pattern altImagesHeaderPattern = Pattern.compile("<div id=\"altImages\"[^>]+>");
     static final Pattern altImageHeaderPattern = Pattern.compile("<li class=\"a-spacing-small item\">");
     static final Pattern URLPattern = Pattern.compile("href=\"");
+    static final Pattern outgoingLinksPattern = Pattern.compile("src=\"|href=\"");
 
-    private String title;
-    private double price;
-    private List<Review> reviews;
-    private List<String> altImages; // local path to alternate images
+    static final String root = "https://www.amazon.com";
 
     public AmazonDataParser(String html) {
         super(html);
-        reviews = new ArrayList<>();
-        altImages = new ArrayList<>();
     }
 
     public List<String> extractAlternateImages() {
         if (getHtml() == null) return null;
+        List<String> altImages = new ArrayList<String>();
         Matcher matcher = altImagesHeaderPattern.matcher(getHtml()); // find the header for all alt images
         if (matcher.find()) {
             int idx = matcher.end();
@@ -47,7 +44,28 @@ public class AmazonDataParser extends DataParser {
                 altImages.add(extractImage(altImageHtml));
             }
         }
+        setAlternateImages(altImages);
         return altImages;
+    }
+
+    public List<String> extractOutgoingLinks() {
+        if (getHtml() == null) return null;
+
+        Matcher matcher = outgoingLinksPattern.matcher(getHtml());
+        List<String> outgoingLinks = new ArrayList<String>();
+        while (matcher.find()) {
+            StringBuffer buff = new StringBuffer();
+            int idx = matcher.end();
+            while (idx < getHtml().length() && getHtml().charAt(idx) != '\"') {
+                buff.append(getHtml().charAt(idx));
+                idx++;
+            }
+            String link = buff.toString();
+            if (link.startsWith("/")) link = root + link;
+            outgoingLinks.add(link);
+        }
+        setOutgoingLinks(outgoingLinks);
+        return outgoingLinks;
     }
 
     public List<Review> extractReviews() {
@@ -56,6 +74,7 @@ public class AmazonDataParser extends DataParser {
 
         // setup matcher to find review headers
         Matcher matcher = reviewPattern.matcher(getHtml());
+        List<Review> reviews = new ArrayList<Review>();
         // for each review
         while (matcher.find()) {
             Review review = new Review();
@@ -101,6 +120,7 @@ public class AmazonDataParser extends DataParser {
             }
             reviews.add(review);
         }
+        setReviews(reviews);
         return reviews;
     }
 
@@ -150,9 +170,8 @@ public class AmazonDataParser extends DataParser {
     }
 
     public String extractName() {
-        if (title == null) {
-            title = getContent(titlePattern, getHtml(), '<');
-        }
+        String title = getContent(titlePattern, getHtml(), '<');
+        setName(title);
         return title;
     }
 
@@ -164,7 +183,9 @@ public class AmazonDataParser extends DataParser {
             index = matcher.end();
         }
         try {
-            return extractImage(getHtml().substring(index));
+            String image = extractImage(getHtml().substring(index));
+            setImage(image);
+            return image;
         } catch (StringIndexOutOfBoundsException | NullPointerException e) {
             // e.printStackTrace();
         }
@@ -172,18 +193,18 @@ public class AmazonDataParser extends DataParser {
     }
 
     public double extractPrice() {
-        if (price == 0.0) {
-            String temp = getContent(dealPricePattern, getHtml(), '<');
-            if (temp == null) {
-                temp = getContent(regularPricePattern, getHtml(), '<');
-            }
-            try {
-                if (temp == null || temp.length() == 0) price = 0;
-                else price = Double.parseDouble(temp.substring(1));
-            } catch (Exception e) {
-                // no need to take action, price should stay at zero
-                e.printStackTrace();
-            }
+        double price = 0.0;
+        String temp = getContent(dealPricePattern, getHtml(), '<');
+        if (temp == null) {
+            temp = getContent(regularPricePattern, getHtml(), '<');
+        }
+        try {
+            if (temp == null || temp.length() == 0) price = 0;
+            else price = Double.parseDouble(temp.substring(1));
+            setPrice(price);
+        } catch (Exception e) {
+            // no need to take action, price should stay at zero
+            e.printStackTrace();
         }
         return price;
     }

@@ -21,8 +21,8 @@ public class EbayDataParser extends DataParser {
 
     double bidPrice;
 
-    public EbayDataParser(HtmlParseData data) {
-        super(data);
+    public EbayDataParser(String html) {
+        super(html);
         bidPrice = 0.0;
     }
 
@@ -81,6 +81,10 @@ public class EbayDataParser extends DataParser {
             altImages.add(getContent(imagePattern, temp, '\"').trim());
         }
         return altImages;
+    }
+
+    public List<String> extractOutgoingLinks() {
+        return null;
     }
 
 

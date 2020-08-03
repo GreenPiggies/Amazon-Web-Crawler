@@ -12,6 +12,7 @@ public abstract class DataParser {
     private double price;
     private List<Review> reviews;
     private List<String> alternateImages;
+    private List<String> outgoingLinks;
 
     public DataParser(String html) {
         this.html = html;
@@ -26,6 +27,7 @@ public abstract class DataParser {
     abstract double extractPrice();
     abstract List<Review> extractReviews();
     abstract List<String> extractAlternateImages();
+    abstract List<String> extractOutgoingLinks();
 
 
     /**
@@ -104,6 +106,15 @@ public abstract class DataParser {
 
     public String getHtml() {
         return html;
+    }
+
+    public void setOutgoingLinks(List<String> outgoingLinks) {
+        this.outgoingLinks = outgoingLinks;
+    }
+
+    public List<String> getOutgoingLinks() {
+        if (outgoingLinks == null) extractOutgoingLinks();
+        return outgoingLinks;
     }
 
 }

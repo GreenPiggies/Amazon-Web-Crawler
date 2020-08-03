@@ -10,6 +10,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -45,6 +48,7 @@ public class AmazonCrawler extends WebCrawler {
             throw new RuntimeException(ex.getCause());
         }
     }
+
 
     /**
      * Returns whether or not the specified URL should be visited, given the page it has been found in.

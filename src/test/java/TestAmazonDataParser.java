@@ -25,7 +25,7 @@ public class TestAmazonDataParser {
     @Before
     public void setup() {
         data = mock(HtmlParseData.class);
-        parser = new AmazonDataParser(data);
+        parser = new AmazonDataParser(data.getHtml());
         try {
             BufferedReader buff = new BufferedReader(new FileReader("amazon_test.txt"));
             StringBuffer str = new StringBuffer();

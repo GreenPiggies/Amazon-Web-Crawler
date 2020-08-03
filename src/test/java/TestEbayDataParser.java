@@ -23,7 +23,7 @@ public class TestEbayDataParser {
     @Before
     public void setup() {
         data = mock(HtmlParseData.class);
-        parser = new EbayDataParser(data);
+        parser = new EbayDataParser(data.getHtml());
         try {
             BufferedReader buff = new BufferedReader(new FileReader("ebay_test.txt"));
             StringBuffer str = new StringBuffer();
