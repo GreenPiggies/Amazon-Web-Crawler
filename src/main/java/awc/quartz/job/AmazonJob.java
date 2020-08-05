@@ -1,3 +1,12 @@
+package awc.quartz.job;
+
+import awc.AmazonScheduler;
+import awc.ReviewProcessor;
+import awc.csv.Entry;
+import awc.csv.Review;
+import awc.dataparser.AmazonDataParser;
+import awc.jobrepo.AmazonJobRepo;
+import awc.jobrepo.MessageQueue;
 import org.quartz.*;
 
 import java.io.*;
@@ -6,7 +15,6 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
@@ -14,6 +22,7 @@ public class AmazonJob implements Job {
 
     private static final String baseURL = "https://nlp.netbase.com/sentiment?languageTag=en&mode=index&syntax=twitter&text=";
 
+    private static final AmazonJobRepo repo = AmazonJobRepo.getInstance();
 
     private static String encodeValue(String value) {
         try {
@@ -66,11 +75,20 @@ public class AmazonJob implements Job {
 
     public void execute(JobExecutionContext context) throws JobExecutionException
     {
-        String url = MessageQueue.getInstance().queue.remove();
+        AmazonJobRepo repo = AmazonJobRepo.getInstance();
+
+        JobDataMap dataMap = context.getJobDetail().getJobDataMap();
+
+
+
+        repo.start(dataMap.getInt("crawler number"));
+
+
+        String url = dataMap.getString("url");
 
         String productID = getProductID(url);
 
-        MessageQueue.getInstance().seen.add(productID);
+        repo.visited(productID);
 
 
         String html = getHtml(url);
@@ -78,7 +96,7 @@ public class AmazonJob implements Job {
         AmazonDataParser parser = new AmazonDataParser(html);
 
         Entry pageEntry = new Entry();
-        pageEntry.set("RECORD_ID", "page" + MessageQueue.getInstance().seen.size());
+        pageEntry.set("RECORD_ID", "page" + AmazonJobRepo.getInstance().size());
         pageEntry.set("RECORD_URL", url);
         pageEntry.set("RECORD_TITLE", parser.getName());
         pageEntry.set("META_TAGS2", "AmazonReview");
@@ -87,28 +105,28 @@ public class AmazonJob implements Job {
 
         pageEntry.set("META_TAGS", productID);
         System.out.println("META TAG: " + productID);
-        AmazonScheduler.writer.println(pageEntry);
-        AmazonScheduler.writer.flush();
+        AmazonJobRepo.getInstance().addData(pageEntry);
+
 
         System.out.println("-------");
         System.out.println("title: " + parser.getName());
-        System.out.println("-------");
-        System.out.println("price: " + parser.getPrice());
-        System.out.println("-------");
+//        System.out.println("-------");
+//        System.out.println("price: " + parser.getPrice());
+//        System.out.println("-------");
 
 
 
-        System.out.println("alternate images: ");
-        for (String s : parser.getAlternateImages()) {
-            System.out.println(s);
-        }
-
-        System.out.println("reviews: ");
+//        System.out.println("alternate images: ");
+//        for (String s : parser.getAlternateImages()) {
+//            System.out.println(s);
+//        }
+//
+//        System.out.println("reviews: ");
 
         int count = 0;
         for (Review r : parser.getReviews()) {
             String reviewText;
-            r.setRecordID("page" + MessageQueue.getInstance().seen.size() + "-review" + count++);
+            r.setRecordID("page" + AmazonJobRepo.getInstance().size() + "-review" + count++);
             r.setProductID(productID);
             if (r.getReviewText().length() > 1000) {
                 reviewText = r.getReviewText().substring(0, 1000); // truncate to 1000 characters
@@ -125,8 +143,7 @@ public class AmazonJob implements Job {
 //            System.out.println("---------");
 
 
-            AmazonScheduler.writer.println(reviewEntry);
-            AmazonScheduler.writer.flush();
+            AmazonJobRepo.getInstance().addData(reviewEntry);
         }
 
         Set<String> tags = new HashSet<String>();
@@ -139,14 +156,18 @@ public class AmazonJob implements Job {
                     idx++;
                 }
                 String tag = getProductID(link.substring(0, idx));
-                if (!MessageQueue.getInstance().seen.contains(tag) && !tags.contains(tag)) {
-                    MessageQueue.getInstance().queue.add(link.substring(0, idx));
+                if (!AmazonJobRepo.getInstance().hasVisited(tag) && !tags.contains(tag)) {
+                    AmazonJobRepo.getInstance().addLink(link.substring(0, idx));
                     tags.add(tag);
-                    System.out.println(link.substring(0, idx));
+//                    System.out.println(link.substring(0, idx));
                 }
             }
         }
 
+        repo.end(dataMap.getInt("crawler number"));
+
+
+        // should set it as done???? i hope
     }
 
 }

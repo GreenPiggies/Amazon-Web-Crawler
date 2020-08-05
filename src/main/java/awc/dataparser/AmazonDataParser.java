@@ -1,5 +1,6 @@
-// DONE
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
+package awc.dataparser;// DONE
+
+import awc.csv.Review;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ public class AmazonDataParser extends DataParser {
     }
 
     public List<String> extractAlternateImages() {
-        if (getHtml() == null) return null;
+        if (getHtml() == null) return new ArrayList<String>();
         List<String> altImages = new ArrayList<String>();
         Matcher matcher = altImagesHeaderPattern.matcher(getHtml()); // find the header for all alt images
         if (matcher.find()) {
@@ -49,7 +50,7 @@ public class AmazonDataParser extends DataParser {
     }
 
     public List<String> extractOutgoingLinks() {
-        if (getHtml() == null) return null;
+        if (getHtml() == null) return new ArrayList<String>();
 
         Matcher matcher = outgoingLinksPattern.matcher(getHtml());
         List<String> outgoingLinks = new ArrayList<String>();
@@ -70,7 +71,7 @@ public class AmazonDataParser extends DataParser {
 
     public List<Review> extractReviews() {
         // if data is null, return null
-        if (getHtml() == null) return null;
+        if (getHtml() == null) return new ArrayList<Review>();
 
         // setup matcher to find review headers
         Matcher matcher = reviewPattern.matcher(getHtml());
@@ -172,11 +173,12 @@ public class AmazonDataParser extends DataParser {
     public String extractName() {
         String title = getContent(titlePattern, getHtml(), '<');
         setName(title);
+        if (title == null) title = "";
         return title;
     }
 
     public String extractMainImage() {
-        if (getHtml() == null) return null;
+        if (getHtml() == null) return "";
         Matcher matcher = mainImagePattern.matcher(getHtml());
         int index = -1;
         if (matcher.find()) {
@@ -189,7 +191,7 @@ public class AmazonDataParser extends DataParser {
         } catch (StringIndexOutOfBoundsException | NullPointerException e) {
             // e.printStackTrace();
         }
-        return null;
+        return "";
     }
 
     public double extractPrice() {

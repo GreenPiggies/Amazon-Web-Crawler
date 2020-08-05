@@ -1,4 +1,6 @@
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
+package awc.dataparser;
+
+import awc.csv.Review;
 
 import java.util.List;
 import java.util.regex.Matcher;
@@ -22,12 +24,12 @@ public abstract class DataParser {
         alternateImages = null;
     }
 
-    abstract String extractName();
-    abstract String extractMainImage();
-    abstract double extractPrice();
-    abstract List<Review> extractReviews();
-    abstract List<String> extractAlternateImages();
-    abstract List<String> extractOutgoingLinks();
+    public abstract String extractName();
+    public abstract String extractMainImage();
+    public abstract double extractPrice();
+    public abstract List<Review> extractReviews();
+    public abstract List<String> extractAlternateImages();
+    public abstract List<String> extractOutgoingLinks();
 
 
     /**

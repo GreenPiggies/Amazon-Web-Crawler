@@ -1,3 +1,6 @@
+package awc.quartz;
+
+import awc.quartz.job.HelloJob;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerFactory;
@@ -23,7 +26,7 @@ public class QuartzTesting {
 
         sched.addCalendar("myHolidays", cal, false, false);
 
-        // define the job and tie it to our HelloJob class
+        // define the job and tie it to our awc.quartz.job.HelloJob class
         JobDetail job = newJob(HelloJob.class)
                 .withIdentity("myJob", "group1")
                 .build();

@@ -1,3 +1,5 @@
+package awc.csv;
+
 public class Review {
 
     private String name;

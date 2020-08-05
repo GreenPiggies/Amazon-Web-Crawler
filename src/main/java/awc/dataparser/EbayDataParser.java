@@ -1,4 +1,6 @@
-import edu.uci.ics.crawler4j.parser.HtmlParseData;
+package awc.dataparser;
+
+import awc.csv.Review;
 
 import java.util.ArrayList;
 import java.util.List;

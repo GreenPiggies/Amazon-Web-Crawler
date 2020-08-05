@@ -1,3 +1,6 @@
+package awc.controller;
+
+import awc.crawler.EbayCrawler;
 import edu.uci.ics.crawler4j.crawler.CrawlConfig;
 import edu.uci.ics.crawler4j.crawler.CrawlController;
 import edu.uci.ics.crawler4j.fetcher.PageFetcher;
@@ -10,7 +13,7 @@ import java.io.PrintWriter;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * The AmazonController class is the "runner" class for my web crawler.
+ * The awc.controller.AmazonController class is the "runner" class for my web crawler.
  */
 public class EbayController{
     public static void main(String[] args) throws Exception {

@@ -1,3 +1,5 @@
+package awc.quartz.job;
+
 import org.quartz.*;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ public class DumbJob implements Job {
 
         state.add(new Date());
 
-        System.err.println("Instance " + key + " of DumbJob says: " + jobSays + ", and val is: " + myFloatValue);
+        System.err.println("Instance " + key + " of awc.quartz.job.DumbJob says: " + jobSays + ", and val is: " + myFloatValue);
     }
 
     public void setJobSays(String jobSays) {
