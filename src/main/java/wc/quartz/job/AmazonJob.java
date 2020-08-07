@@ -1,12 +1,10 @@
-package awc.quartz.job;
+package wc.quartz.job;
 
-import awc.AmazonScheduler;
-import awc.ReviewProcessor;
-import awc.csv.Entry;
-import awc.csv.Review;
-import awc.dataparser.AmazonDataParser;
-import awc.jobrepo.AmazonJobRepo;
-import awc.jobrepo.MessageQueue;
+import wc.ReviewProcessor;
+import wc.csv.Entry;
+import wc.csv.Review;
+import wc.dataparser.AmazonDataParser;
+import wc.jobrepo.AmazonJobRepo;
 import org.quartz.*;
 
 import java.io.*;
@@ -32,9 +30,11 @@ public class AmazonJob implements Job {
         }
     }
 
-    static String getProductID(String url) {
+    public static String getProductID(String url) {
+        if (url == null) return null;
         StringBuffer productIDBuffer = new StringBuffer();
         int index = url.indexOf("/dp/") + 4;
+        if (index == 3) return "";
         while (index < url.length() && url.charAt(index) != '/' && url.charAt(index) != '?') {
             productIDBuffer.append(url.charAt(index));
             index++;
@@ -42,7 +42,7 @@ public class AmazonJob implements Job {
         return productIDBuffer.toString();
     }
 
-    static String getHtml(String link) {
+    public static String getHtml(String link) {
         URL url = null;
         try {
             url = new URL(link);

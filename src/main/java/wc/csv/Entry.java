@@ -1,7 +1,6 @@
-package awc.csv;
+package wc.csv;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class Entry {
     private LinkedHashMap<String, String> mp;

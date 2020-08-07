@@ -1,6 +1,6 @@
-package awc.jobrepo;
+package wc.jobrepo;
 
-import awc.csv.Entry;
+import wc.csv.Entry;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,8 +45,6 @@ public class AmazonJobRepo implements JobRepo{
     }
 
     public boolean stillRunning() {return !crawlers.isEmpty();}
-
-
 
     public String getNextLink ()
     {

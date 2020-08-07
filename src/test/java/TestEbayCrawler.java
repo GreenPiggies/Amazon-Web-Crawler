@@ -1,4 +1,4 @@
-import awc.crawler.EbayCrawler;
+import wc.crawler.EbayCrawler;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.url.WebURL;
 import org.junit.Before;

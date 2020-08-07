@@ -1,4 +1,4 @@
-package awc.quartz.job;
+package wc.quartz.job;
 
 import org.quartz.*;
 

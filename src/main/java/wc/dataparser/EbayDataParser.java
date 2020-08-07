@@ -1,6 +1,6 @@
-package awc.dataparser;
+package wc.dataparser;
 
-import awc.csv.Review;
+import wc.csv.Review;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,18 +8,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class EbayDataParser extends DataParser {
-    private Pattern namePattern = Pattern.compile("id=\"itemTitle\"><span[^>]+>[^<]+</span>");
-    private Pattern bidPricePattern = Pattern.compile("id=\"prcIsum_bidPrice\" itemprop=\"price\" content=\"");
-    private Pattern buyPricePattern = Pattern.compile("id=\"prcIsum\" itemprop=\"price\" style=\"\" content=\"");
-    private Pattern mainImagePattern = Pattern.compile("itemprop=\"image\" src=\"");
-    private Pattern reviewHeaderPattern = Pattern.compile("<div class=\" ebay-review-section\"[^>]+>");
-    private Pattern reviewRatingPattern = Pattern.compile("<div role=\"img\" class=\"ebay-star-rating\" aria-label=\"");
-    private Pattern reviewNamePattern = Pattern.compile("class=\"review-item-author\" itemprop=\"author\" title=\"");
-    private Pattern reviewDatePattern = Pattern.compile("<span itemprop=\"datePublished\" content=\"");
-    private Pattern reviewTitlePattern = Pattern.compile("<p itemprop=\"name\" class=\"review-item-title[^>]+>");
-    private Pattern reviewBodyPattern = Pattern.compile("<p itemprop=\"reviewBody\" class=\"review-item-content[^>]+>");
-    private Pattern altImagePattern = Pattern.compile("<a id=\"vi_main_img_fs[^>]+>");
-    private Pattern imagePattern = Pattern.compile("src=\"");
+    static final Pattern namePattern = Pattern.compile("id=\"itemTitle\"><span[^>]+>[^<]+</span>");
+    static final Pattern bidPricePattern = Pattern.compile("id=\"prcIsum_bidPrice\" itemprop=\"price\" content=\"");
+    static final Pattern buyPricePattern = Pattern.compile("id=\"prcIsum\" itemprop=\"price\" style=\"\" content=\"");
+    static final Pattern mainImagePattern = Pattern.compile("itemprop=\"image\" src=\"");
+    static final Pattern reviewHeaderPattern = Pattern.compile("<div class=\" ebay-review-section\"[^>]+>");
+    static final Pattern reviewRatingPattern = Pattern.compile("<div role=\"img\" class=\"ebay-star-rating\" aria-label=\"");
+    static final Pattern reviewNamePattern = Pattern.compile("class=\"review-item-author\" itemprop=\"author\" title=\"");
+    static final Pattern reviewDatePattern = Pattern.compile("<span itemprop=\"datePublished\" content=\"");
+    static final Pattern reviewTitlePattern = Pattern.compile("<p itemprop=\"name\" class=\"review-item-title[^>]+>");
+    static final Pattern reviewBodyPattern = Pattern.compile("<p itemprop=\"reviewBody\" class=\"review-item-content[^>]+>");
+    static final Pattern altImagePattern = Pattern.compile("<a id=\"vi_main_img_fs[^>]+>");
+    static final Pattern imagePattern = Pattern.compile("src=\"");
+    static final Pattern outgoingLinksPattern = Pattern.compile("href=\"|src=\"");
+    static final String root = "https://www.ebay.com";
+
 
     double bidPrice;
 
@@ -86,7 +89,23 @@ public class EbayDataParser extends DataParser {
     }
 
     public List<String> extractOutgoingLinks() {
-        return null;
+        if (getHtml() == null) return new ArrayList<String>();
+
+        Matcher matcher = outgoingLinksPattern.matcher(getHtml());
+        List<String> outgoingLinks = new ArrayList<String>();
+        while (matcher.find()) {
+            StringBuffer buff = new StringBuffer();
+            int idx = matcher.end();
+            while (idx < getHtml().length() && getHtml().charAt(idx) != '\"') {
+                buff.append(getHtml().charAt(idx));
+                idx++;
+            }
+            String link = buff.toString();
+            if (link.startsWith("/")) link = root + link;
+            outgoingLinks.add(link);
+        }
+        setOutgoingLinks(outgoingLinks);
+        return outgoingLinks;
     }
 
 

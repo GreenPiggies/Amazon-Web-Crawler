@@ -1,4 +1,4 @@
-package awc.csv;
+package wc.csv;
 
 public class Review {
 

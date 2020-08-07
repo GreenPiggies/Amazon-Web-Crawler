@@ -1,15 +1,11 @@
-package awc;
+package wc;
 
-import awc.csv.Entry;
-import awc.csv.Review;
-import org.apache.commons.codec.binary.Base64;
+import wc.csv.Entry;
+import wc.csv.Review;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 public class ReviewProcessor {
 
@@ -19,17 +15,13 @@ public class ReviewProcessor {
         Entry entry = new Entry();
         if (review == null || requestURL == null) return entry;
         try {
-            // first add review info to the entry
             entry.set("RECORD_ID", review.getRecordID());
-
             entry.set("RECORD_DATETIME", review.getReviewDate());
             entry.set("RECORD_TITLE", review.getReviewTitle());
             entry.set("RECORD_URL", review.getReviewURL());
             entry.set("RECORD_TEXT", review.getReviewText());
             entry.set("AUTHOR_NAME", review.getName());
             entry.set("META_TAGS", review.getProductID());
-
-
             // establish website connection
             URL url = new URL(requestURL);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -99,42 +91,9 @@ public class ReviewProcessor {
 //                }
 //                idx++;
 //            }
-//            System.out.println("secondbuff: " + secondBuff.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
         return entry;
-    }
-
-    public static void main(String[] args) throws Exception {
-        URL url = new URL("https://nlp.netbase.com/sentiment?languageTag=en&mode=index&syntax=twitter&text=that's%20pretty%20epic");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("GET");
-
-        String auth = "<redacted>";
-        byte[] encodedAuth = Base64.encodeBase64(auth.getBytes(StandardCharsets.UTF_8));
-        String authHeaderValue = "Basic " + new String(encodedAuth);
-        con.setRequestProperty("Authorization", authHeaderValue);
-
-        int status = con.getResponseCode();
-
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer content = new StringBuffer();
-        while ((inputLine = in.readLine()) != null) {
-            content.append(inputLine);
-        }
-        in.close();
-
-        System.out.println(content);
-
-        con.disconnect();
-
-
-
-
-
-
     }
 }

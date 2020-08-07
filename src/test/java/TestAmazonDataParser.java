@@ -1,4 +1,4 @@
-import awc.dataparser.AmazonDataParser;
+import wc.dataparser.AmazonDataParser;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import org.junit.Before;
 import org.junit.Test;

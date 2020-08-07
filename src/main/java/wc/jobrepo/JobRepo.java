@@ -1,4 +1,4 @@
-package awc.jobrepo;
+package wc.jobrepo;
 
 import java.util.List;
 

@@ -1,10 +1,10 @@
-package awc.crawler;
+package wc.crawler;
 
-import awc.*;
-import awc.csv.Entry;
-import awc.csv.Review;
-import awc.dataparser.AmazonDataParser;
-import awc.dataparser.DataParser;
+import wc.*;
+import wc.csv.Entry;
+import wc.csv.Review;
+import wc.dataparser.DataParser;
+import wc.dataparser.EbayDataParser;
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
@@ -13,23 +13,27 @@ import org.apache.http.Header;
 
 import java.io.*;
 import java.net.URLEncoder;
-
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * The awc.crawler.AmazonCrawler class constructs an Amazon Web Crawler that keeps track of the number of pages it has crawled through.
  */
-public class AmazonCrawler extends WebCrawler {
+@Deprecated
+public class EbayCrawler extends WebCrawler {
+
+    private static Pattern productIDPattern = Pattern.compile("itm/[^/]+/");
 
     // not being used atm, might remove it later
     private static final Pattern WEBSITE_EXTENSIONS = Pattern.compile(".*\\.(org|com|gov)$");
 
-    private static final String baseURL = "https://nlp.netbase.com/sentiment?languageTag=en&mode=index&syntax=twitter&text=";
-
     // keeps count on the number of crawled (seen) pages
     private final AtomicInteger seenPages;
+
+    private static final String baseURL = "https://nlp.netbase.com/sentiment?languageTag=en&mode=index&syntax=twitter&text=";
 
     private PrintWriter writer;
 
@@ -38,9 +42,25 @@ public class AmazonCrawler extends WebCrawler {
      * Constructs a MyCrawler object.
      * @param pages An AtomicInteger that keeps track of the number of pages visited by the crawler.
      */
-    public AmazonCrawler(AtomicInteger pages, PrintWriter writer) {
+    public EbayCrawler(AtomicInteger pages, PrintWriter writer) {
         seenPages = pages;
         this.writer = writer;
+    }
+
+    /**
+     * Returns whether or not the specified URL should be visited, given the page it has been found in.
+     * @param referringPage The page from which the specified URL was found.
+     * @param url The specified URL.
+     * @return True if the URL should be visited, false otherwise.
+     */
+    @Override
+    public boolean shouldVisit(Page referringPage, WebURL url) {
+        if (referringPage == null || url == null || url.getURL() == null) return false;
+        // atm referringPage isn't used, might be used later
+        String href = url.getURL().toLowerCase();
+
+        // pretty simple heuristic, visit the page if its an amazon link.
+        return href.startsWith("https://www.ebay.com") && href.contains("/itm/"); // means its a product
     }
 
     private static String encodeValue(String value) {
@@ -51,26 +71,8 @@ public class AmazonCrawler extends WebCrawler {
         }
     }
 
-
-    /**
-     * Returns whether or not the specified URL should be visited, given the page it has been found in.
-     * @param referringPage The page from which the specified URL was found.
-     * @param url The specified URL.
-     * @return True if the URL should be visited, false otherwise.
-     */
-    public boolean shouldVisit(Page referringPage, WebURL url) {
-        // atm referringPage isn't used, might be used later
-        if (url == null || url.getURL() == null || referringPage == null) return false;
-
-        String href = url.getURL().toLowerCase();
-
-        // pretty simple heuristic, visit the page if its an amazon link.
-        return href.startsWith("https://www.amazon.com") && href.contains("/dp/"); // means its a product
-    }
-
     /**
      * Visits a web page.
-     * Precondition: This web page should be visited and it is not null.
      * @param page The page to be visited.
      */
     @Override
@@ -80,15 +82,8 @@ public class AmazonCrawler extends WebCrawler {
          * For now, I'm just printing them out on the logger.
          * */
 
-
-
         int docid = page.getWebURL().getDocid();
         String url = page.getWebURL().getURL();
-
-
-
-
-
         String domain = page.getWebURL().getDomain();
         String path = page.getWebURL().getPath();
         String subDomain = page.getWebURL().getSubDomain();
@@ -110,60 +105,60 @@ public class AmazonCrawler extends WebCrawler {
 
 
             HtmlParseData htmlParseData = (HtmlParseData) page.getParseData();
+            String text = htmlParseData.getText();
             String html = htmlParseData.getHtml().trim();
-            html.replaceAll("[ \t\n\r]+","\n");
-            DataParser parser = new AmazonDataParser(html);
 
-//            int num = 0;
-//            try {
-//                PrintWriter writer = new PrintWriter(new FileWriter(new File("amazon_test.txt")));
-//                writer.println(html.length());
-//                writer.println(html);
-//                writer.flush();
-//                writer.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+            DataParser parser = new EbayDataParser(html);
+
+            // this code gets the outgoing URLs, which we want to crawl
+            Set<WebURL> links = htmlParseData.getOutgoingUrls();
+            for (WebURL link : links) {
+                System.out.println(link.getURL());
+            }
+
+            logger.debug("Text length: {}", text.length());
+            logger.debug("Html length: {}", html.length());
+//            logger.debug("Number of outgoing links: {}", links.size());
+
+            html.replaceAll("[ \t\n\r]+","\n");
 
             Entry pageEntry = new Entry();
             pageEntry.set("RECORD_ID", "page" + seenPages);
             pageEntry.set("RECORD_URL", url);
             pageEntry.set("RECORD_TITLE", parser.getName());
-            pageEntry.set("META_TAGS2", "AmazonReview");
+            pageEntry.set("META_TAGS2", "EbayReview");
 
-            // get product id
-            StringBuffer productIDBuffer = new StringBuffer();
-            int index = url.indexOf("/dp/") + 4;
-            System.out.println(index);
+            // product ID
+            Matcher temp = productIDPattern.matcher(url);
+            String productID = "";
+            int index = -1;
+            if (temp.find()) {
+                index = temp.end();
+            }
+            StringBuffer buff = new StringBuffer();
             while (index < url.length() && url.charAt(index) != '/' && url.charAt(index) != '?') {
-                productIDBuffer.append(url.charAt(index));
+                buff.append(url.charAt(index));
                 index++;
             }
+            productID = buff.toString();
+            pageEntry.set("META_TAGS", productID);
 
-            pageEntry.set("META_TAGS", productIDBuffer.toString());
-            System.out.println("META TAG: " + productIDBuffer.toString());
-            writer.println(pageEntry.toString());
+            writer.println(pageEntry);
+            writer.flush();
 
             System.out.println("-------");
-            System.out.println("title: " + parser.getName());
+            System.out.println("title: " + parser.extractName());
             System.out.println("-------");
-            System.out.println("price: " + parser.getPrice());
+            System.out.println("price: " + parser.extractPrice());
             System.out.println("-------");
-
-
-
-            System.out.println("alternate images: ");
-            for (String s : parser.getAlternateImages()) {
-                System.out.println(s);
-            }
-
+            System.out.println("main image: " + parser.getMainImage());
             System.out.println("reviews: ");
 
             int count = 0;
             for (Review r : parser.getReviews()) {
                 String reviewText;
                 r.setRecordID("page" + seenPages + "-review" + count++);
-                r.setProductID(productIDBuffer.toString());
+                r.setProductID(productID);
                 if (r.getReviewText().length() > 1000) {
                     reviewText = r.getReviewText().substring(0, 1000); // truncate to 1000 characters
                 } else {
@@ -172,40 +167,27 @@ public class AmazonCrawler extends WebCrawler {
                 r.setReviewText(reviewText);
                 String urlEncodedReview = encodeValue(reviewText);
                 String requestURL = baseURL + urlEncodedReview;
+
                 try {
                     Thread.sleep(1000);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 Entry reviewEntry = ReviewProcessor.getSentiment(r, requestURL);
-                reviewEntry.set("META_TAGS2", "AmazonReview");
+                reviewEntry.set("META_TAGS2", "EbayReview");
                 System.out.println("---------");
                 System.out.println(reviewEntry);
                 System.out.println("---------");
 
                 writer.println(reviewEntry);
                 writer.flush();
+
+                System.out.println(r);
             }
-
-
-
-
-//            System.out.println("main image link: " + parser.getMainImage());
-
-//            // JSON CODE
-//            obj.put("Name", parser.getTitle());
-//            obj.put("Price", "$" + parser.getPrice());
-//
-//            try {
-//                File file = new File("D:\\tmp-json\\" + docid + ".json");
-//                file.createNewFile();
-//                FileWriter fileWriter = new FileWriter(file);
-//                fileWriter.write(obj.toJSONString());
-//                fileWriter.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-
+            System.out.println("alternate images: ");
+            for (String s : parser.getAlternateImages()) {
+                System.out.println(s);
+            }
 
 
 
@@ -219,8 +201,6 @@ public class AmazonCrawler extends WebCrawler {
                 logger.debug("\t{}: {}", header.getName(), header.getValue());
             }
         }
-
-        // printout for the number of pages visited so far.
 
         logger.debug("=============");
     }

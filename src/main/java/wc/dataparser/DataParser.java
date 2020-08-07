@@ -1,14 +1,12 @@
-package awc.dataparser;
+package wc.dataparser;
 
-import awc.csv.Review;
+import wc.csv.Review;
 
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 public abstract class DataParser {
     private String html;
-
-
     private String name;
     private String image;
     private double price;
@@ -30,7 +28,6 @@ public abstract class DataParser {
     public abstract List<Review> extractReviews();
     public abstract List<String> extractAlternateImages();
     public abstract List<String> extractOutgoingLinks();
-
 
     /**
      * This method extracts the content (a string) from the first matched pattern index until the specified character.

@@ -1,6 +1,6 @@
-import awc.csv.Entry;
-import awc.csv.Review;
-import awc.ReviewProcessor;
+import wc.csv.Entry;
+import wc.csv.Review;
+import wc.ReviewProcessor;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

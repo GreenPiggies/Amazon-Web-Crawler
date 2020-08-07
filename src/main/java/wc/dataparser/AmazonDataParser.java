@@ -1,6 +1,6 @@
-package awc.dataparser;// DONE
+package wc.dataparser;// DONE
 
-import awc.csv.Review;
+import wc.csv.Review;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,6 @@ public class AmazonDataParser extends DataParser {
             String altImagesHtml = getHtml().substring(idx);
             matcher = altImageHeaderPattern.matcher(altImagesHtml);
             while (matcher.find()) {
-                idx = matcher.end();
                 String altImageHtml = altImagesHtml.substring(matcher.end());
                 altImages.add(extractImage(altImageHtml));
             }
@@ -189,7 +188,7 @@ public class AmazonDataParser extends DataParser {
             setImage(image);
             return image;
         } catch (StringIndexOutOfBoundsException | NullPointerException e) {
-            // e.printStackTrace();
+             e.printStackTrace();
         }
         return "";
     }
